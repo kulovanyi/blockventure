@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>Blockventure</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Top Status Bar (Currency & Profile & Settings) -->
+    <header class="player-bar">
+        <!-- Square Character Avatar Button -->
+        <button id="btn-top-profile" class="top-avatar-btn" title="Karakter Profil & Statisztikák">
+            <div class="top-avatar-frame">
+                <img id="top-avatar-img" class="top-avatar-img" src="" alt="Avatar" style="display:none;">
+                <span id="top-avatar-icon" class="top-avatar-icon">🧑‍🚀</span>
+            </div>
+            <div class="top-player-meta">
+                <span id="top-player-name" class="top-player-name">Játékos</span>
+                <span id="top-player-rank-badge" class="top-player-rank-badge">🌱 1. Szint</span>
+            </div>
+        </button>
+        <div class="top-bar-right">
+            <div class="currency-group">
+                <div class="currency-badge coin-badge" title="Érmék">
+                    <span class="gold-icon"></span>
+                    <span id="player-coins">100</span>
+                </div>
+            </div>
+            <button id="btn-settings" class="icon-btn settings-header-btn" title="Beállítások">⚙️</button>
+        </div>
+    </header>
+
+    <!-- Main Screens Container -->
+    <main class="main-content">
+        <!-- SCREEN 1: LOBBY (CSAK A 2 NAGY 3D GOMB + REKORDOK + MOZGÓ HÁTTÉR + LOGÓ) -->
+        <section id="view-lobby" class="screen-view active">
+            <!-- 60FPS Hardware Accelerated 3D Cyber Grid Canvas -->
+            <canvas id="lobby-grid-canvas" class="lobby-grid-canvas"></canvas>
+
+            <div class="lobby-hero-brand">
+                <div class="lobby-brand-icon-wrap">
+                    <span class="lobby-brand-icon">💥</span>
+                </div>
+                <h1 class="lobby-brand-title">BLOCKVENTURE</h1>
+                <p class="lobby-brand-subtitle">CYBER PUZZLE ADVENTURE</p>
+            </div>
+
+            <div class="lobby-3d-container">
+                <!-- Classic Mode 3D Button Group -->
+                <div class="mode-3d-group">
+                    <div class="mode-record-tag">
+                        <span class="record-icon">🏆</span>
+                        <span class="record-label">Aktuális rekord:</span>
+                        <strong id="lobby-classic-best" class="record-val">0</strong> <span class="record-unit">pont</span>
+                    </div>
+                    <button class="btn-3d btn-3d-classic" id="btn-mode-classic">
+                        <span class="btn-3d-shadow"></span>
+                        <span class="btn-3d-edge"></span>
+                        <span class="btn-3d-front">
+                            <span class="btn-3d-icon">🕹️</span>
+                            <span class="btn-3d-text">KLASSZIKUS</span>
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Adventure Mode 3D Button Group -->
+                <div class="mode-3d-group">
+                    <div class="mode-record-tag adventure-tag">
+                        <span class="record-icon">🏆</span>
+                        <span class="record-label">Aktuális rekord:</span>
+                        <strong id="lobby-adventure-best" class="record-val">0</strong> <span class="record-unit">pont</span>
+                    </div>
+                    <button class="btn-3d btn-3d-adventure" id="btn-mode-adventure">
+                        <span class="btn-3d-shadow"></span>
+                        <span class="btn-3d-edge"></span>
+                        <span class="btn-3d-front">
+                            <span class="btn-3d-icon">🚀</span>
+                            <span class="btn-3d-text">KALAND</span>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 2: BOLT (SHOP) -->
+        <section id="view-shop" class="screen-view">
+            <div class="section-title">
+                <h2>🛒 Bolt & Kinézetek</h2>
+                <p class="subtitle">Szerezz új blokk témákat és vedd át a napi bónuszokat!</p>
+            </div>
+
+            <!-- Daily Gift Box -->
+            <div class="shop-daily-card">
+                <div class="daily-left">
+                    <span class="daily-icon">🎁</span>
+                    <div>
+                        <h3>Napi Ingyenes Jutalom</h3>
+                        <p>Naponta egyszer 100 <span class="gold-icon"></span> ajándék!</p>
+                    </div>
+                </div>
+                <button id="btn-claim-daily" class="btn-shop-claim">Átvétel</button>
+            </div>
+
+            <h3 class="shop-subheading">Blokk Témák & Skinek</h3>
+            <div id="shop-themes-list" class="themes-grid">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- SCREEN 3: FEJLESZTÉSEK (UPGRADES) -->
+        <section id="view-upgrades" class="screen-view">
+            <div class="section-title">
+                <h2>⚡ Képességek & Fejlesztések</h2>
+                <p class="subtitle">Fejleszd a képességeidet a Kaland módhoz és növeld a bevételeidet!</p>
+            </div>
+
+            <div id="upgrades-list" class="upgrades-container">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- SCREEN 4: ACHIEVMENT (KÜLDETÉSEK & XP HALADÁS) -->
+        <section id="view-achievements" class="screen-view">
+            <div class="section-title">
+                <h2>⭐ Küldetések & Eredmények</h2>
+                <p class="subtitle">Teljesíts végtelen kihívásokat, gyűjts aranyat és lépj Mester Szinteket!</p>
+            </div>
+
+            <!-- Achievement XP Progress Big Hero Card -->
+            <div class="ach-xp-hero-card" id="ach-xp-hero-card">
+                <div class="ach-xp-header">
+                    <div class="ach-xp-rank-badge" id="ach-hero-rank-icon">👑</div>
+                    <div class="ach-xp-rank-info">
+                        <div class="ach-xp-rank-title" id="ach-hero-rank-title">Kezdő Blaszter</div>
+                        <div class="ach-xp-rank-sub" id="ach-hero-rank-level">Mester Rang: 1. Szint</div>
+                    </div>
+                    <div class="ach-xp-badge-count" id="ach-hero-count">0 Teljesítve ✨</div>
+                </div>
+                <div class="ach-xp-bar-container">
+                    <div class="ach-xp-bar-label">
+                        <span>XP Haladás</span>
+                        <span id="ach-hero-xp-text">0 / 150 XP</span>
+                    </div>
+                    <div class="ach-xp-progress-bar">
+                        <div class="ach-xp-progress-fill" id="ach-hero-xp-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unified Achievements list -->
+            <div id="achievements-list" class="achievements-container">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- SCREEN 5: RANGSOR (DOBOGÓ ÉS RANGLISTA 2 FÜLLEL) -->
+        <section id="view-leaderboard" class="screen-view">
+            <div class="section-title">
+                <h2>🏆 Rangsor & Bajnokság</h2>
+                <p class="subtitle">Versenyezz a legjobb pontszámokért és szintekért!</p>
+            </div>
+
+            <!-- Mode Switcher Tabs for Leaderboard -->
+            <div class="ach-mode-tabs">
+                <button class="ach-tab-btn active" id="tab-lb-classic" data-mode="classic">
+                    <span>🕹️ Klasszikus Liga</span>
+                </button>
+                <button class="ach-tab-btn" id="tab-lb-adventure" data-mode="adventure">
+                    <span>🚀 Kaland Rangsor</span>
+                </button>
+            </div>
+
+            <!-- Podium View -->
+            <div class="podium-wrap" id="ach-podium">
+                <div class="podium-step step-2">
+                    <div class="podium-avatar">🥈</div>
+                    <div class="podium-name" id="podium-2-name">BlasterPro</div>
+                    <div class="podium-score" id="podium-2-score">8,420 pont</div>
+                    <div class="step-box">2</div>
+                </div>
+                <div class="podium-step step-1">
+                    <div class="podium-crown">👑</div>
+                    <div class="podium-avatar">🥇</div>
+                    <div class="podium-name" id="podium-1-name">NeonKing</div>
+                    <div class="podium-score" id="podium-1-score">12,650 pont</div>
+                    <div class="step-box">1</div>
+                </div>
+                <div class="podium-step step-3">
+                    <div class="podium-avatar">🥉</div>
+                    <div class="podium-name" id="podium-3-name">CubeMaster</div>
+                    <div class="podium-score" id="podium-3-score">6,890 pont</div>
+                    <div class="step-box">3</div>
+                </div>
+            </div>
+
+            <!-- Rankings list -->
+            <div id="leaderboard-list" class="leaderboard-table">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- SCREEN 6: ACTIVE GAMEPLAY VIEW (ALSÓ MENÜSOR NÉLKÜL) -->
+        <section id="view-game" class="screen-view">
+            <!-- In-game Navigation & Status -->
+            <div class="ingame-top-bar">
+                <button id="btn-game-back" class="btn-back-lobby">⬅️ Lobby</button>
+                <div class="ingame-mode-badge" id="ingame-mode-title">Klasszikus Mód</div>
+            </div>
+
+            <!-- Score & Goals Bar -->
+            <div class="game-stats-bar">
+                <div class="score-card">
+                    <span class="score-label" id="score-card-title">Pontszám</span>
+                    <span id="current-score" class="score-value">0</span>
+                </div>
+                <div class="score-card high-score" id="high-score-card">
+                    <span class="score-label" id="target-card-title">Rekord 🏆</span>
+                    <span id="high-score" class="score-value">0</span>
+                </div>
+            </div>
+
+            <!-- Adventure Mode Objective Bar -->
+            <div id="adventure-objective-bar" class="adventure-obj-bar" style="display: none;">
+                <span class="obj-text" id="moves-left-display">⏳ Hátralévő lépések: 10</span>
+                <span class="moves-text" id="moves-upgrade-info">✨ Fejlesztések aktívak</span>
+            </div>
+
+            <!-- Combo Notification Banner -->
+            <div id="combo-banner" class="combo-banner">
+                🔥 COMBO x2!
+            </div>
+
+            <!-- 8x8 Board Container -->
+            <div class="board-wrapper">
+                <div id="board" class="board"></div>
+            </div>
+
+            <!-- Draggable Pieces Dock -->
+            <div class="dock-wrapper">
+                <div class="dock">
+                    <div id="slot-0" class="dock-slot"></div>
+                    <div id="slot-1" class="dock-slot"></div>
+                    <div id="slot-2" class="dock-slot"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Navigation Bar (5 Tabs) - Hidden during gameplay -->
+    <nav id="bottom-nav" class="bottom-nav">
+        <button class="nav-tab" data-tab="view-shop">
+            <span class="nav-icon">🛒</span>
+            <span class="nav-label">Bolt</span>
+        </button>
+        <button class="nav-tab" data-tab="view-upgrades">
+            <span class="nav-icon">⚡</span>
+            <span class="nav-label">Fejlesztések</span>
+        </button>
+        <button class="nav-tab active" data-tab="view-lobby">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Lobby</span>
+        </button>
+        <button class="nav-tab" data-tab="view-achievements">
+            <span class="nav-icon">🏆</span>
+            <span class="nav-label">Achievment</span>
+        </button>
+        <button class="nav-tab" data-tab="view-leaderboard">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Rangsor</span>
+        </button>
+    </nav>
+
+    <!-- Drag Ghost Element -->
+    <div id="drag-ghost" style="display: none;"></div>
+
+    <!-- MODAL: Character Profile & Stats -->
+    <div id="profile-modal" class="modal-overlay">
+        <div class="modal-card profile-modal-card">
+            <div class="modal-header-row">
+                <h2 id="profile-modal-title">👤 Karakter Profil</h2>
+                <button id="btn-close-profile" class="modal-close-btn" title="Bezárás">✖</button>
+            </div>
+
+            <!-- Profile Hero Card (Avatar + Edit + Name + Rank) -->
+            <div class="profile-hero-card">
+                <div class="profile-avatar-wrapper">
+                    <div class="profile-avatar-box">
+                        <img id="profile-avatar-display" class="profile-avatar-img" src="" alt="Avatar" style="display:none;">
+                        <span id="profile-avatar-icon-display" class="profile-avatar-icon">🧑‍🚀</span>
+                    </div>
+                    <button id="btn-change-avatar" class="btn-avatar-upload" title="Saját kép feltöltése">
+                        📷 Kép tallózás
+                    </button>
+                    <input type="file" id="avatar-file-input" accept="image/*" style="display: none;">
+                </div>
+
+                <div class="profile-info-block">
+                    <div class="profile-name-row">
+                        <input type="text" id="profile-player-name" class="profile-name-input" maxlength="15" value="Játékos" placeholder="Add meg a neved...">
+                        <button id="btn-save-name" class="btn-mini-save" title="Név mentése">💾</button>
+                    </div>
+                    <div class="profile-rank-tag" id="profile-rank-tag">
+                        <span id="profile-rank-icon">🌱</span>
+                        <span id="profile-rank-name">Kezdő Blaszter</span>
+                    </div>
+                    <div class="profile-rank-level" id="profile-rank-level">Mester Rang: 1. Szint</div>
+                </div>
+            </div>
+
+            <!-- Preset Avatar Selector -->
+            <div id="profile-preset-avatars-row" class="preset-avatars-row">
+                <span class="preset-label">Gyors avatarok:</span>
+                <div class="preset-icons-list">
+                    <button class="preset-avatar-btn" data-icon="🧑‍🚀">🧑‍🚀</button>
+                    <button class="preset-avatar-btn" data-icon="🤖">🤖</button>
+                    <button class="preset-avatar-btn" data-icon="🐱">🐱</button>
+                    <button class="preset-avatar-btn" data-icon="🦊">🦊</button>
+                    <button class="preset-avatar-btn" data-icon="👑">👑</button>
+                    <button class="preset-avatar-btn" data-icon="👾">👾</button>
+                    <button class="preset-avatar-btn" data-icon="⚡">⚡</button>
+                </div>
+            </div>
+
+            <!-- Leaderboard & Achievement Highlight Badges -->
+            <div class="profile-standings-grid">
+                <div class="profile-standing-card">
+                    <span class="standing-icon">🕹️</span>
+                    <div class="standing-details">
+                        <span class="standing-label">Klasszikus Liga</span>
+                        <strong class="standing-rank" id="profile-classic-rank">#7</strong>
+                        <span class="standing-sub" id="profile-classic-best">0 pont</span>
+                    </div>
+                </div>
+                <div class="profile-standing-card">
+                    <span class="standing-icon">🚀</span>
+                    <div class="standing-details">
+                        <span class="standing-label">Kaland Rangsor</span>
+                        <strong class="standing-rank" id="profile-adv-rank">#7</strong>
+                        <span class="standing-sub" id="profile-adv-best">0 pont</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievement XP Progress Bar -->
+            <div class="profile-ach-section">
+                <div class="profile-ach-header">
+                    <span class="ach-label">🏆 Achievement Haladás</span>
+                    <span id="profile-ach-count">0 Teljesítve ✨</span>
+                </div>
+                <div class="ach-xp-progress-bar">
+                    <div class="ach-xp-progress-fill" id="profile-ach-xp-fill" style="width: 0%;"></div>
+                </div>
+                <div class="profile-ach-xp-text" id="profile-ach-xp-text">0 / 150 XP a következő rangig</div>
+            </div>
+
+            <!-- Comprehensive Stats Summary -->
+            <div class="profile-stats-grid">
+                <div class="pstat-item">
+                    <span class="pstat-label">Összes Lerakott Kocka</span>
+                    <span class="pstat-val" id="pstat-blocks">0 db</span>
+                </div>
+                <div class="pstat-item">
+                    <span class="pstat-label">Eltüntetett Sorok</span>
+                    <span class="pstat-val" id="pstat-lines">0 sor</span>
+                </div>
+                <div class="pstat-item">
+                    <span class="pstat-label">Legnagyobb Kombó</span>
+                    <span class="pstat-val" id="pstat-maxcombo">x1</span>
+                </div>
+                <div class="pstat-item">
+                    <span class="pstat-label">Összes Érme</span>
+                    <span class="pstat-val" id="pstat-coins">0 <span class="gold-icon"></span></span>
+                </div>
+            </div>
+
+            <div class="modal-buttons" style="margin-top: 14px;">
+                <button id="btn-done-profile" class="btn-primary">Kész ✓</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Settings -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-card settings-card">
+            <div class="modal-header-row">
+                <h2>⚙️ Beállítások</h2>
+                <button id="btn-close-settings" class="modal-close-btn" title="Bezárás">✖</button>
+            </div>
+            
+            <!-- Audio Settings -->
+            <div class="settings-section">
+                <div class="settings-row">
+                    <span class="settings-label">🔊 Hangerő</span>
+                    <span id="volume-val-display" class="settings-val">80%</span>
+                </div>
+                <div class="volume-slider-wrap">
+                    <input type="range" id="volume-slider" min="0" max="100" value="80" class="styled-slider">
+                </div>
+                <button id="btn-toggle-sound" class="btn-toggle-sound">
+                    <span id="sound-status-icon">🔊</span>
+                    <span id="sound-status-text">Hangok Bekapcsolva</span>
+                </button>
+            </div>
+
+            <!-- In-Game Exit Option (Only displayed when playing game) -->
+            <div id="settings-ingame-section" class="settings-ingame-section" style="display: none;">
+                <hr class="settings-divider">
+                <p class="settings-exit-hint">Kilépés a jelenlegi pontszámmal és meccs mentése:</p>
+                <button id="btn-settings-exit-game" class="btn-danger-exit">
+                    <span>🚪 Kilépés a játékból</span>
+                </button>
+            </div>
+
+            <div class="modal-buttons" style="margin-top: 18px;">
+                <button id="btn-save-close-settings" class="btn-primary">Kész ✓</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Game Over -->
+    <div id="game-over-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h2 id="go-title">JÁTÉK VÉGE</h2>
+            <p class="modal-desc" id="go-desc">Nincs több érvényes lépés a jelenlegi elemekkel!</p>
+            <div class="modal-stats">
+                <div class="modal-stat-row">
+                    <span>Elért pontszám:</span>
+                    <span id="final-score" class="modal-stat-val">0</span>
+                </div>
+                <div class="modal-stat-row">
+                    <span>Szerzett érmék:</span>
+                    <span id="final-coins" class="modal-stat-val" style="color: #fcd34d;">+0 <span class="gold-icon"></span></span>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button id="btn-restart" class="btn-primary">Újra játszom 🚀</button>
+                <button id="btn-go-lobby" class="btn-secondary">Vissza a Lobbyba 🏠</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="audio.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
