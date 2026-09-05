@@ -44,32 +44,174 @@ const SHAPES = [
     { matrix: [[0, 1, 0], [1, 1, 1], [0, 1, 0]], color: 'c-cyan', name: 'plus' }
 ];
 
-// Themes
-const THEMES = [
-    { id: 'neon', name: 'Neon Cyber', price: 0, swatches: ['#06b6d4', '#8b5cf6', '#ec4899', '#10b981'] },
-    { id: 'gems', name: 'Kristály Drágakő', price: 300, swatches: ['#38bdf8', '#6366f1', '#c084fc', '#f43f5e'] },
-    { id: 'retro', name: 'Retro 8-Bit', price: 600, swatches: ['#00f0ff', '#ff0077', '#ffff00', '#00ff66'] },
-    { id: 'candy', name: 'Candy Édesség', price: 900, swatches: ['#67e8f9', '#d8b4fe', '#f9a8d4', '#fed7aa'] },
-    { id: 'gold', name: 'Arany Deluxe', price: 1500, swatches: ['#fef08a', '#fbbf24', '#f59e0b', '#d97706'] }
+// Shop Items / Consumables / Boosters (2-Column Grid)
+const SHOP_ITEMS_DEF = [
+    {
+        id: 'item_bomb',
+        name: 'Bomba Készlet',
+        icon: '💣',
+        qty: '3 db',
+        price: 150,
+        desc: 'Felrobbant egy 3x3-as területet szorult helyzetekben.'
+    },
+    {
+        id: 'item_reroll',
+        name: 'Forma Újradobó',
+        icon: '🔄',
+        qty: '5 db',
+        price: 100,
+        desc: 'Újra cseréli a dokkolóban lévő 3 lehelyezhető alakzatot.'
+    },
+    {
+        id: 'item_moves',
+        name: 'Extra Lépések',
+        icon: '⏳',
+        qty: '+10 Lépés',
+        price: 200,
+        desc: 'Azonnali bónusz lépéseket ad Kaland módban.'
+    },
+    {
+        id: 'item_magnet',
+        name: 'Kvantum Mágnes',
+        icon: '🧲',
+        qty: '2 db',
+        price: 250,
+        desc: 'Eltávolítja az összes azonos színű blokkot a tábláról.'
+    },
+    {
+        id: 'item_shield',
+        name: 'Védőpajzs',
+        icon: '🛡️',
+        qty: '2 db',
+        price: 300,
+        desc: 'Megvéd a vereségtől és kitisztítja a pálya közepét.'
+    },
+    {
+        id: 'item_chest',
+        name: 'Kincses Zsák',
+        icon: '💰',
+        qty: '500 Érme',
+        price: 350,
+        desc: 'Kincsesláda azonnali fejlesztések vásárlásához.'
+    }
 ];
 
-// Upgrades (Adventure Mode Only)
+// Upgrades (2-Column Grid)
 const UPGRADES_DEF = [
     { 
         id: 'extraMoves', 
-        name: 'Kezdőlépések (+1 Lépés)', 
+        name: 'Kezdőlépések', 
         icon: '⏳', 
         maxLvl: 50, 
         baseCost: 50, 
-        desc: 'Minden szint növeli a Kaland mód kezdő lépésszámát +1 lépéssel (Alap: 10).' 
+        desc: 'Növeli a Kaland mód kezdő lépésszámát.',
+        getStat: lvl => `+${lvl} lépés (Össz: ${10 + lvl})`
     },
     { 
         id: 'skipChance', 
-        name: 'Lépésmegtartás Esély (+0.2%)', 
+        name: 'Lépésmegtartás', 
         icon: '🎲', 
-        maxLvl: 100, 
+        maxLvl: 50, 
         baseCost: 80, 
-        desc: 'Minden szinttel +0.2%-kal nő az esély, hogy lerakáskor nem vesztesz lépést (Ingyen lépés).' 
+        desc: 'Esély lerakáskor az ingyenes lépésre.',
+        getStat: lvl => `+${(lvl * 0.4).toFixed(1)}% esély`
+    },
+    { 
+        id: 'coinBonus', 
+        name: 'Arany Bónusz', 
+        icon: '🪙', 
+        maxLvl: 50, 
+        baseCost: 100, 
+        desc: 'Extra érmék sorok törlésekor és játék végén.',
+        getStat: lvl => `+${lvl * 5}% arany`
+    },
+    { 
+        id: 'comboBoost', 
+        name: 'Kombó Szorzó', 
+        icon: '⚡', 
+        maxLvl: 50, 
+        baseCost: 120, 
+        desc: 'Magasabb bónusz pontok aktív láncoknál.',
+        getStat: lvl => `+${lvl * 10}% pont`
+    }
+];
+
+// Mysterious Codex Books Catalog (3 Books, 3 Pages Each)
+const BOOKS_DATA = [
+    {
+        id: 'book_ancients',
+        title: 'Az Ősi Kockák Titkai',
+        vol: 'I. Kötet',
+        icon: '💠',
+        totalPages: 3,
+        unlockedPages: 3,
+        pages: [
+            {
+                chapter: 'I. FEJEZET',
+                title: 'A Geometria Hajnala',
+                text: 'A téridő hajnalán, még mielőtt a csillagok fénye felragyogott volna, a világegyetemet tiszta geometriai erők uralták. Az Első Építők hatalmas kockákba sűrítették a kozmikus elemeket: a fényt, energiát és anyagot. Ezek a lebegő alakzatok a fizika törvényeit meghazudtolva illeszkedtek össze, dimenziókapukat nyitva az ismeretlenbe.'
+            },
+            {
+                chapter: 'II. FEJEZET',
+                title: 'A Sorok Feloldása',
+                text: 'Amikor egy sor vagy oszlop tökéletes teljességbe kerül, az anyag nem semmisül meg, hanem tiszta kozmikus energiává alakul át. Ez a Blokkok Fénytörése. Az ókori tekercsek szerint minél több sort tüntet el egy blokkmester egyetlen mozdulattal, annál közelebb kerül az univerzum rejtett titkainak megértéséhez.'
+            },
+            {
+                chapter: 'III. FEJEZET',
+                title: 'A Tökéletes Harmónia',
+                text: 'A mesterek sosem kapkodnak. A játéktábla nem pusztán kövek és blokkok halmaza, hanem az elme tükre. Aki megtanulja előre látni a formák és az üresség játékát, nem csupán a magas pontszámokat éri el, hanem feltárja a Blockventure legmélyebb, elfeledett titkait.'
+            }
+        ]
+    },
+    {
+        id: 'book_quantum',
+        title: 'A Kvantum Rács Legendája',
+        vol: 'II. Kötet',
+        icon: '🔮',
+        totalPages: 3,
+        unlockedPages: 3,
+        pages: [
+            {
+                chapter: 'I. FEJEZET',
+                title: 'A Nyolcas Rács Ébredése',
+                text: 'A 8×8-as rács nem véletlen szerkezet. A cyber-világban a 64-es szám a végtelen lehetőségek szent alapja. Minden egyes cella egy mikro-erőtér, amely a megfelelő formák rezonanciájára vár. Az ősi kibernetikus lények ezen a rácson szimulálták a galaxisok és világok születését.'
+            },
+            {
+                chapter: 'II. FEJEZET',
+                title: 'A Kombó Rezonancia',
+                text: 'Ha a rácson egymás után, megszakítás nélkül törölnek sorokat, kialakul a Kombó Rezonancia. Ilyenkor a cellák fala pulzálni kezd, a gravitáció megváltozik, és a tábla aranyfényben úszva extra energiát bocsát ki. A legendák szerint a tízszeres kombó megnyitja a titkos dimenziókaput.'
+            },
+            {
+                chapter: 'III. FEJEZET',
+                title: 'A Túlélés Művészete',
+                text: 'A legnagyobb veszély a tér beszűkülése. Ha a rács megtelik és nincs hely az érkező formáknak, a kvantumkapocs összeomlik, és a valóság újraindul. A bölcs játékos mindig hagy legalább egy 3×3-as szabad területet a váratlanul érkező nagy kockáknak.'
+            }
+        ]
+    },
+    {
+        id: 'book_chronicles',
+        title: 'A Kalandorok Krónikája',
+        vol: 'III. Kötet',
+        icon: '🧭',
+        totalPages: 3,
+        unlockedPages: 3,
+        pages: [
+            {
+                chapter: 'I. FEJEZET',
+                title: 'Az Elveszett Expedíciók',
+                text: 'Számtalan bátor utazó indult már el a Kaland mód ismeretlen mélységeibe. Kezdetben csak egyszerű lépésszámlálókkal és korlátozott eszközökkel rendelkeztek. De minél mélyebbre jutottak a virtuális katakombákban, annál több ritka ereklyét fedeztek fel, amelyek meghosszabbították útjukat.'
+            },
+            {
+                chapter: 'II. FEJEZET',
+                title: 'Misztikus Kódex Lapok',
+                text: 'A régiek feljegyzései szerint a legveszélyesebb kazamaták mélyén elveszett pergamenlapok és kódex-töredékek lebegnek. Aki összegyűjti ezeket a ritka oldalakat, az örök dicsőséget és olyan rejtett tudást nyer el, mely örökre megváltoztatja a kalandok szabályait.'
+            },
+            {
+                chapter: 'III. FEJEZET',
+                title: 'A Végtelen Út Tanítása',
+                text: 'Nincs végső határ, és nincs megmászhatatlan hegycsúcs. Minden lerakott kő egy tapasztalat, minden törölt sor egy új esély. Ragadd meg a formákat, fejleszd a képességeidet, és írd be saját nevedet a Blockventure örök dicsőségtáblájára!'
+            }
+        ]
     }
 ];
 
@@ -333,10 +475,11 @@ class BlockBlasterApp {
 
         this.achCurrentTab = 'classic';
         this.lbCurrentTab = 'classic';
+        this.currentBook = null;
+        this.currentBookPage = 0;
 
         this.initDOM();
         this.attachGlobalEvents();
-        this.applyTheme(this.profile.equippedTheme);
         this.updateProfileUI();
         this.renderShop();
         this.renderUpgrades();
@@ -351,13 +494,16 @@ class BlockBlasterApp {
             avatarIcon: '🧑‍🚀',
             customAvatar: null,
             coins: 150, totalCoinsEarned: 150,
-            classicBest: 0, adventureBest: 0, equippedTheme: 'neon',
-            ownedThemes: ['neon'], upgrades: { extraMoves: 0, skipChance: 0 },
+            classicBest: 0, adventureBest: 0,
+            upgrades: { extraMoves: 0, skipChance: 0, coinBonus: 0, comboBoost: 0 },
+            inventory: { item_bomb: 0, item_reroll: 0, item_moves: 0, item_magnet: 0, item_shield: 0 },
             stats: { lines: 0, combos: 0, blocksPlaced: 0, advBlocksPlaced: 0, coinsCollected: 0, maxCombo: 1, destroyedColors: {} },
             achievementTiers: {}, achievementXp: 0, claimedAchievementCount: 0, lastDailyClaim: null
         };
         const saved = localStorage.getItem('blockBlaster_profile');
         this.profile = saved ? Object.assign(defaultProfile, JSON.parse(saved)) : defaultProfile;
+        if (!this.profile.upgrades) this.profile.upgrades = { extraMoves: 0, skipChance: 0, coinBonus: 0, comboBoost: 0 };
+        if (!this.profile.inventory) this.profile.inventory = { item_bomb: 0, item_reroll: 0, item_moves: 0, item_magnet: 0, item_shield: 0 };
         if (!this.profile.playerName) this.profile.playerName = 'Játékos';
         if (!this.profile.avatarIcon) this.profile.avatarIcon = '🧑‍🚀';
     }
@@ -725,6 +871,14 @@ class BlockBlasterApp {
         this.bindClick('tab-lb-classic', () => { this.lbCurrentTab = 'classic'; this.renderLeaderboard(); });
         this.bindClick('tab-lb-adventure', () => { this.lbCurrentTab = 'adventure'; this.renderLeaderboard(); });
         this.bindClick('btn-claim-daily', () => this.claimDailyReward());
+
+        // Codex & Mysterious Books Bindings
+        this.bindClick('btn-top-codex', () => this.openCodex());
+        this.bindClick('btn-close-codex', () => this.closeCodex());
+        this.bindClick('btn-close-reader', () => this.closeCodex());
+        this.bindClick('btn-book-back-shelf', () => this.showShelfView());
+        this.bindClick('btn-book-prev', () => this.prevBookPage());
+        this.bindClick('btn-book-next', () => this.nextBookPage());
 
         // Profile Modal Bindings
         this.bindClick('btn-top-profile', () => this.openProfileModal(null));
@@ -1501,49 +1655,36 @@ class BlockBlasterApp {
     }
 
     /* -------------------------------------------------------------
-       BOLT (SHOP)
+       BOLT (SHOP - 2-COLUMN TILES)
        ------------------------------------------------------------- */
     renderShop() {
-        const container = document.getElementById('shop-themes-list');
+        const container = document.getElementById('shop-items-grid');
         if (!container) return;
         container.innerHTML = '';
 
-        THEMES.forEach(theme => {
-            const isOwned = this.profile.ownedThemes.includes(theme.id);
-            const isEquipped = this.profile.equippedTheme === theme.id;
-
+        SHOP_ITEMS_DEF.forEach(item => {
             const card = document.createElement('div');
-            card.className = `theme-card ${isEquipped ? 'active' : ''}`;
+            card.className = 'shop-item-card';
 
-            let buttonHtml = '';
-            if (isEquipped) {
-                buttonHtml = `<button class="btn-theme-action btn-equipped">Felszerelve ✓</button>`;
-            } else if (isOwned) {
-                buttonHtml = `<button class="btn-theme-action btn-equip" data-theme="${theme.id}">Felszerelés</button>`;
-            } else {
-                buttonHtml = `<button class="btn-theme-action btn-buy" data-theme="${theme.id}" data-price="${theme.price}">Megvétel (${theme.price} <span class="gold-icon"></span>)</button>`;
-            }
-
-            const swatchesHtml = theme.swatches.map(color => `<div class="theme-swatch" style="background: ${color};"></div>`).join('');
+            const ownedQty = (this.profile.inventory && this.profile.inventory[item.id]) || 0;
 
             card.innerHTML = `
-                <div class="theme-name">${theme.name}</div>
-                <div class="theme-swatches">${swatchesHtml}</div>
-                ${buttonHtml}
+                <div class="shop-item-icon-wrap">${item.icon}</div>
+                <div class="shop-item-qty-badge">${item.qty}</div>
+                <div class="shop-item-title">${item.name}</div>
+                <div class="shop-item-desc">${item.desc}</div>
+                <button class="btn-shop-buy" data-item="${item.id}" data-price="${item.price}">
+                    <span>Vásárlás</span>
+                    <span>${item.price} <span class="gold-icon"></span></span>
+                </button>
             `;
 
             container.appendChild(card);
         });
 
-        container.querySelectorAll('.btn-buy').forEach(btn => {
+        container.querySelectorAll('.btn-shop-buy').forEach(btn => {
             btn.addEventListener('click', () => {
-                this.buyTheme(btn.dataset.theme, parseInt(btn.dataset.price, 10));
-            });
-        });
-
-        container.querySelectorAll('.btn-equip').forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.equipTheme(btn.dataset.theme);
+                this.buyShopItem(btn.dataset.item, parseInt(btn.dataset.price, 10));
             });
         });
 
@@ -1560,30 +1701,27 @@ class BlockBlasterApp {
         }
     }
 
-    buyTheme(themeId, price) {
+    buyShopItem(itemId, price) {
         if (this.profile.coins < price) {
-            alert('Nincs elég érméd a téma megvásárlásához!');
+            alert('Nincs elég érméd ehhez a kellékhez!');
             return;
         }
+
+        const itemDef = SHOP_ITEMS_DEF.find(i => i.id === itemId);
+        if (!itemDef) return;
+
         this.profile.coins -= price;
-        this.profile.ownedThemes.push(themeId);
-        this.profile.equippedTheme = themeId;
+        if (!this.profile.inventory) this.profile.inventory = {};
+        this.profile.inventory[itemId] = (this.profile.inventory[itemId] || 0) + 1;
+
+        if (itemId === 'item_chest') {
+            this.profile.coins += 500;
+        }
+
         this.saveProfile();
-        this.applyTheme(themeId);
         this.renderShop();
         window.soundManager.playCoin();
-    }
-
-    equipTheme(themeId) {
-        this.profile.equippedTheme = themeId;
-        this.saveProfile();
-        this.applyTheme(themeId);
-        this.renderShop();
-        window.soundManager.playClick();
-    }
-
-    applyTheme(themeId) {
-        document.body.className = `theme-${themeId}`;
+        alert(`🎉 Sikeresen megvásároltad: ${itemDef.name} (${itemDef.qty})!`);
     }
 
     claimDailyReward() {
@@ -1599,51 +1737,43 @@ class BlockBlasterApp {
     }
 
     /* -------------------------------------------------------------
-       FEJLESZTÉSEK (UPGRADES)
+       FEJLESZTÉSEK (UPGRADES - 2-COLUMN TILES)
        ------------------------------------------------------------- */
     renderUpgrades() {
-        const container = document.getElementById('upgrades-list');
+        const container = document.getElementById('upgrades-grid');
         if (!container) return;
         container.innerHTML = '';
 
         UPGRADES_DEF.forEach(upg => {
-            const currentLvl = this.profile.upgrades[upg.id] || 0;
+            const currentLvl = (this.profile.upgrades && this.profile.upgrades[upg.id]) || 0;
             const isMax = currentLvl >= upg.maxLvl;
             const nextCost = upg.baseCost * (currentLvl + 1);
+            const statText = upg.getStat ? upg.getStat(currentLvl) : `LV ${currentLvl}`;
 
-            let statText = '';
-            if (upg.id === 'extraMoves') {
-                statText = `+${currentLvl} Lépés (Kezdés: ${10 + currentLvl} lépés)`;
-            } else if (upg.id === 'skipChance') {
-                statText = `+${(currentLvl * 0.2).toFixed(1)}% Esély`;
-            }
+            const tile = document.createElement('div');
+            tile.className = 'upgrade-tile';
 
-            const card = document.createElement('div');
-            card.className = 'upgrade-card';
-
-            card.innerHTML = `
-                <div class="upgrade-icon-wrap">${upg.icon}</div>
-                <div class="upgrade-info">
-                    <div class="upgrade-title-row">
-                        <h3>${upg.name}</h3>
-                        <span class="upgrade-lvl">${isMax ? 'MAX' : `LV ${currentLvl}/${upg.maxLvl}`}</span>
-                    </div>
-                    <p class="upgrade-desc">${upg.desc}</p>
-                    <div style="font-size: 0.78rem; color: #60a5fa; font-weight: 700; margin-top: 4px;">Aktuális bónusz: ${statText}</div>
+            tile.innerHTML = `
+                <div class="upgrade-tile-top">
+                    <div class="upgrade-tile-icon">${upg.icon}</div>
+                    <span class="upgrade-tile-lvl ${isMax ? 'maxed' : ''}">${isMax ? 'MAX' : `LV ${currentLvl}/${upg.maxLvl}`}</span>
                 </div>
+                <div class="upgrade-tile-title">${upg.name}</div>
+                <div class="upgrade-tile-desc">${upg.desc}</div>
+                <div class="upgrade-tile-stat">${statText}</div>
                 ${isMax ? 
-                    `<button class="btn-upgrade maxed">MAX</button>` :
-                    `<button class="btn-upgrade" data-upg="${upg.id}" data-cost="${nextCost}">
+                    `<button class="btn-upgrade-tile maxed">MAX</button>` :
+                    `<button class="btn-upgrade-tile" data-upg="${upg.id}" data-cost="${nextCost}">
                         <span>Fejlesztés</span>
                         <span>${nextCost} <span class="gold-icon"></span></span>
                     </button>`
                 }
             `;
 
-            container.appendChild(card);
+            container.appendChild(tile);
         });
 
-        container.querySelectorAll('.btn-upgrade:not(.maxed)').forEach(btn => {
+        container.querySelectorAll('.btn-upgrade-tile:not(.maxed)').forEach(btn => {
             btn.addEventListener('click', () => {
                 this.buyUpgrade(btn.dataset.upg, parseInt(btn.dataset.cost, 10));
             });
@@ -1657,11 +1787,119 @@ class BlockBlasterApp {
         }
 
         this.profile.coins -= cost;
+        if (!this.profile.upgrades) this.profile.upgrades = {};
         this.profile.upgrades[upgId] = (this.profile.upgrades[upgId] || 0) + 1;
         this.addXp(40);
         this.saveProfile();
         this.renderUpgrades();
         window.soundManager.playLevelUp();
+    }
+
+    /* -------------------------------------------------------------
+       KÓDEX & TITKOS KÖNYVEK (CODEX & INTERACTIVE BOOK READER)
+       ------------------------------------------------------------- */
+    openCodex() {
+        const modal = document.getElementById('codex-modal');
+        if (modal) modal.classList.add('active');
+        this.showShelfView();
+        window.soundManager.playClick();
+    }
+
+    closeCodex() {
+        const modal = document.getElementById('codex-modal');
+        if (modal) modal.classList.remove('active');
+        window.soundManager.playClick();
+    }
+
+    showShelfView() {
+        const shelfView = document.getElementById('codex-shelf-view');
+        const readerView = document.getElementById('codex-reader-view');
+        if (shelfView) shelfView.style.display = 'block';
+        if (readerView) readerView.style.display = 'none';
+        this.renderCodexShelf();
+    }
+
+    renderCodexShelf() {
+        const container = document.getElementById('books-shelf-grid');
+        if (!container) return;
+        container.innerHTML = '';
+
+        BOOKS_DATA.forEach(book => {
+            const tile = document.createElement('div');
+            tile.className = 'book-cover-tile';
+            tile.innerHTML = `
+                <div class="book-cover-spine"></div>
+                <div class="book-cover-vol">${book.vol}</div>
+                <div class="book-cover-icon">${book.icon}</div>
+                <div class="book-cover-title">${book.title}</div>
+                <div class="book-cover-pages-badge">📖 ${book.unlockedPages} / ${book.totalPages} Oldal</div>
+            `;
+            tile.addEventListener('click', () => {
+                this.openBook(book.id);
+            });
+            container.appendChild(tile);
+        });
+    }
+
+    openBook(bookId) {
+        const book = BOOKS_DATA.find(b => b.id === bookId);
+        if (!book) return;
+
+        this.currentBook = book;
+        this.currentBookPage = 0;
+
+        const shelfView = document.getElementById('codex-shelf-view');
+        const readerView = document.getElementById('codex-reader-view');
+        if (shelfView) shelfView.style.display = 'none';
+        if (readerView) readerView.style.display = 'block';
+
+        const titleEl = document.getElementById('reader-book-title');
+        if (titleEl) titleEl.textContent = book.title;
+
+        this.renderBookPage();
+        window.soundManager.playClick();
+    }
+
+    renderBookPage() {
+        if (!this.currentBook) return;
+        const pageData = this.currentBook.pages[this.currentBookPage];
+        if (!pageData) return;
+
+        const badgeEl = document.getElementById('reader-chapter-badge');
+        const chapterTitleEl = document.getElementById('reader-chapter-title');
+        const textEl = document.getElementById('reader-page-text');
+        const counterEl = document.getElementById('book-page-counter');
+        const prevBtn = document.getElementById('btn-book-prev');
+        const nextBtn = document.getElementById('btn-book-next');
+        const paperInner = document.getElementById('book-paper-inner');
+
+        if (badgeEl) badgeEl.textContent = pageData.chapter;
+        if (chapterTitleEl) chapterTitleEl.textContent = pageData.title;
+        if (textEl) textEl.textContent = pageData.text;
+        if (counterEl) counterEl.textContent = `${this.currentBookPage + 1} / ${this.currentBook.totalPages} Oldal`;
+
+        if (prevBtn) prevBtn.disabled = (this.currentBookPage === 0);
+        if (nextBtn) nextBtn.disabled = (this.currentBookPage >= this.currentBook.totalPages - 1);
+
+        if (paperInner) {
+            paperInner.style.animation = 'none';
+            void paperInner.offsetWidth; // Trigger reflow for smooth re-animation
+            paperInner.style.animation = 'bookPageFade 0.25s ease-out';
+        }
+    }
+
+    prevBookPage() {
+        if (!this.currentBook || this.currentBookPage <= 0) return;
+        this.currentBookPage--;
+        this.renderBookPage();
+        window.soundManager.playClick();
+    }
+
+    nextBookPage() {
+        if (!this.currentBook || this.currentBookPage >= this.currentBook.totalPages - 1) return;
+        this.currentBookPage++;
+        this.renderBookPage();
+        window.soundManager.playClick();
     }
 
     /* -------------------------------------------------------------
