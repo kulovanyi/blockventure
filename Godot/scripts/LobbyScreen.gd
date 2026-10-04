@@ -2,16 +2,16 @@ extends Control
 
 signal start_mode_selected(mode: String)
 
-@onready var classic_best_label: Label = $ScrollContainer/VBoxContainer/ModeCards/ClassicCard/BestLabel
-@onready var adventure_best_label: Label = $ScrollContainer/VBoxContainer/ModeCards/AdventureCard/BestLabel
-@onready var daily_btn: Button = $ScrollContainer/VBoxContainer/DailyRewardCard/BtnClaim
+@onready var classic_best_label: Label = $ScrollContainer/VBoxContainer/ModeCards/ClassicCard/HBox/Info/BestLabel
+@onready var adventure_best_label: Label = $ScrollContainer/VBoxContainer/ModeCards/AdventureCard/HBox/Info/BestLabel
+@onready var daily_btn: Button = $ScrollContainer/VBoxContainer/DailyRewardCard/HBox/BtnClaim
 
 func _ready() -> void:
-	$ScrollContainer/VBoxContainer/ModeCards/ClassicCard/BtnPlay.pressed.connect(func():
+	$ScrollContainer/VBoxContainer/ModeCards/ClassicCard/HBox/BtnPlay.pressed.connect(func():
 		SoundManager.play_click()
 		emit_signal("start_mode_selected", "classic")
 	)
-	$ScrollContainer/VBoxContainer/ModeCards/AdventureCard/BtnPlay.pressed.connect(func():
+	$ScrollContainer/VBoxContainer/ModeCards/AdventureCard/HBox/BtnPlay.pressed.connect(func():
 		SoundManager.play_click()
 		emit_signal("start_mode_selected", "adventure")
 	)

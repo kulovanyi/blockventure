@@ -45,9 +45,9 @@ var current_book_idx: int = 0
 var current_page_idx: int = 0
 
 func _ready() -> void:
-	$ShelfView/VBoxContainer/BookGrid/Book1/BtnOpen.pressed.connect(func(): _open_book(0))
-	$ShelfView/VBoxContainer/BookGrid/Book2/BtnOpen.pressed.connect(func(): _open_book(1))
-	$ShelfView/VBoxContainer/BookGrid/Book3/BtnOpen.pressed.connect(func(): _open_book(2))
+	$ShelfView/VBoxContainer/BookGrid/Book1/VBox/BtnOpen.pressed.connect(func(): _open_book(0))
+	$ShelfView/VBoxContainer/BookGrid/Book2/VBox/BtnOpen.pressed.connect(func(): _open_book(1))
+	$ShelfView/VBoxContainer/BookGrid/Book3/VBox/BtnOpen.pressed.connect(func(): _open_book(2))
 	
 	$ReaderView/VBoxContainer/BtnBackShelf.pressed.connect(_back_to_shelf)
 	btn_prev.pressed.connect(_prev_page)

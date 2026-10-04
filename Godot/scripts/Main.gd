@@ -3,7 +3,7 @@ extends Control
 # Header nodes
 @onready var lbl_player_name: Label = $VBoxContainer/TopHeader/PlayerInfo/Name
 @onready var lbl_avatar: Label = $VBoxContainer/TopHeader/PlayerInfo/Avatar
-@onready var lbl_coins: Label = $VBoxContainer/TopHeader/CoinsBadge/CoinCount
+@onready var lbl_coins: Label = $VBoxContainer/TopHeader/CoinsBadge/HBox/CoinCount
 @onready var btn_top_codex: Button = $VBoxContainer/TopHeader/BtnCodex
 @onready var btn_top_settings: Button = $VBoxContainer/TopHeader/BtnSettings
 

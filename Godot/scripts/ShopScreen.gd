@@ -1,6 +1,6 @@
 extends Control
 
-@onready var btn_watch_ad: Button = $ScrollContainer/VBoxContainer/FreeRewards/AdCard/BtnWatchAd
+@onready var btn_watch_ad: Button = $ScrollContainer/VBoxContainer/FreeRewards/AdCard/HBox/BtnWatchAd
 @onready var iap_grid: GridContainer = $ScrollContainer/VBoxContainer/IapGrid
 @onready var items_grid: GridContainer = $ScrollContainer/VBoxContainer/ItemsGrid
 

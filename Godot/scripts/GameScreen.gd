@@ -4,8 +4,8 @@ const FloatingTextScene = preload("res://scenes/vfx/FloatingText.tscn")
 
 @onready var board: GridContainer = $VBoxContainer/BoardContainer/Board
 @onready var dock: HBoxContainer = $VBoxContainer/DockContainer/Dock
-@onready var score_label: Label = $VBoxContainer/HeaderBar/ScoreCard/ScoreValue
-@onready var best_label: Label = $VBoxContainer/HeaderBar/BestCard/BestValue
+@onready var score_label: Label = $VBoxContainer/HeaderBar/ScoreCard/HBox/ScoreValue
+@onready var best_label: Label = $VBoxContainer/HeaderBar/BestCard/HBox/BestValue
 @onready var moves_bar: HBoxContainer = $VBoxContainer/AdventureBar
 @onready var moves_label: Label = $VBoxContainer/AdventureBar/MovesValue
 @onready var combo_banner: Label = $VBoxContainer/ComboBanner
