@@ -90,23 +90,43 @@
         <!-- SCREEN 2: BOLT (SHOP) -->
         <section id="view-shop" class="screen-view">
             <div class="section-title">
-                <h2>🛒 Bolt & Kellékek</h2>
-                <p class="subtitle">Vedd át a napi ingyenes ajándékot és szerezz be hasznos kiegészítőket!</p>
+                <h2>🛒 Bolt & Kincstár</h2>
+                <p class="subtitle">Gyűjts ingyen aranyat, vásárolj kincscsomagokat és kaland kellékeket!</p>
             </div>
 
-            <!-- Daily Gift Box -->
-            <div class="shop-daily-card">
-                <div class="daily-left">
-                    <span class="daily-icon">🎁</span>
-                    <div>
-                        <h3>Napi Ingyenes Jutalom</h3>
-                        <p>Naponta egyszer 100 <span class="gold-icon"></span> ajándék!</p>
+            <!-- Free Rewards Row (Daily Gift + Watch Ad) -->
+            <div class="shop-free-rewards-grid">
+                <!-- Daily Gift Box -->
+                <div class="shop-free-card">
+                    <div class="free-card-badge">Napi</div>
+                    <span class="free-card-icon">🎁</span>
+                    <div class="free-card-info">
+                        <h3>Napi Jutalom</h3>
+                        <p>+100 <span class="gold-icon"></span> ingyen</p>
                     </div>
+                    <button id="btn-claim-daily" class="btn-free-claim">Átvétel 🎁</button>
                 </div>
-                <button id="btn-claim-daily" class="btn-shop-claim">Átvétel</button>
+
+                <!-- Watch Ad for Gold -->
+                <div class="shop-free-card shop-ad-card">
+                    <div class="free-card-badge ad-badge">Reklám</div>
+                    <span class="free-card-icon">🎬</span>
+                    <div class="free-card-info">
+                        <h3>Ingyen Arany</h3>
+                        <p>+50 <span class="gold-icon"></span> videónézésért</p>
+                    </div>
+                    <button id="btn-watch-ad" class="btn-free-claim btn-ad-claim">Megnézem 🎬</button>
+                </div>
             </div>
 
-            <h3 class="shop-subheading">Kellékek & Csomagok</h3>
+            <!-- In-App Purchases Gold Store -->
+            <h3 class="shop-subheading">💰 Arany Kincstár (Vásárlás)</h3>
+            <div id="shop-iap-grid" class="shop-grid-2col">
+                <!-- Injected via JS in 2-column tiles -->
+            </div>
+
+            <!-- Helpers & Boosters Section -->
+            <h3 class="shop-subheading" style="margin-top: 18px;">⚡ Kaland Kellékek & Csomagok</h3>
             <div id="shop-items-grid" class="shop-grid-2col">
                 <!-- Injected via JS in 2-column tiles -->
             </div>

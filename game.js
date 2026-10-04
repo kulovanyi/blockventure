@@ -44,6 +44,46 @@ const SHAPES = [
     { matrix: [[0, 1, 0], [1, 1, 1], [0, 1, 0]], color: 'c-cyan', name: 'plus' }
 ];
 
+// In-App Purchases (IAP) Gold Store Packs
+const IAP_GOLD_PACKS = [
+    {
+        id: 'iap_gold_tier1',
+        name: 'Kezdő Kincsesláda',
+        coins: 500,
+        priceStr: '0.99 €',
+        usdStr: '$0.99',
+        icon: '🪙',
+        badge: 'Népszerű'
+    },
+    {
+        id: 'iap_gold_tier2',
+        name: 'Haladó Aranyzsák',
+        coins: 2500,
+        priceStr: '3.99 €',
+        usdStr: '$3.99',
+        icon: '💰',
+        badge: '+25% Bónusz'
+    },
+    {
+        id: 'iap_gold_tier3',
+        name: 'Mester Érmekas',
+        coins: 7000,
+        priceStr: '9.99 €',
+        usdStr: '$9.99',
+        icon: '💎',
+        badge: 'Legjobb Érték'
+    },
+    {
+        id: 'iap_gold_tier4',
+        name: 'Bajnoki Széf',
+        coins: 16000,
+        priceStr: '19.99 €',
+        usdStr: '$19.99',
+        icon: '👑',
+        badge: 'VIP Bónusz'
+    }
+];
+
 // Shop Items / Consumables / Boosters (2-Column Grid)
 const SHOP_ITEMS_DEF = [
     {
@@ -883,6 +923,7 @@ class BlockBlasterApp {
         this.bindClick('tab-lb-classic', () => { this.lbCurrentTab = 'classic'; this.renderLeaderboard(); });
         this.bindClick('tab-lb-adventure', () => { this.lbCurrentTab = 'adventure'; this.renderLeaderboard(); });
         this.bindClick('btn-claim-daily', () => this.claimDailyReward());
+        this.bindClick('btn-watch-ad', () => this.watchRewardedAd());
 
         // In-game Helpers / Powerups Bindings
         this.bindClick('btn-powerup-bomb', () => this.activatePowerup('bomb'));
@@ -1902,35 +1943,62 @@ class BlockBlasterApp {
        BOLT (SHOP - 2-COLUMN TILES)
        ------------------------------------------------------------- */
     renderShop() {
-        const container = document.getElementById('shop-items-grid');
-        if (!container) return;
-        container.innerHTML = '';
-
-        SHOP_ITEMS_DEF.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'shop-item-card';
-
-            const ownedQty = (this.profile.inventory && this.profile.inventory[item.id]) || 0;
-
-            card.innerHTML = `
-                <div class="shop-item-icon-wrap">${item.icon}</div>
-                <div class="shop-item-qty-badge">${item.qty}</div>
-                <div class="shop-item-title">${item.name}</div>
-                <div class="shop-item-desc">${item.desc}</div>
-                <button class="btn-shop-buy" data-item="${item.id}" data-price="${item.price}">
-                    <span>Vásárlás</span>
-                    <span>${item.price} <span class="gold-icon"></span></span>
-                </button>
-            `;
-
-            container.appendChild(card);
-        });
-
-        container.querySelectorAll('.btn-shop-buy').forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.buyShopItem(btn.dataset.item, parseInt(btn.dataset.price, 10));
+        // Render IAP Gold Store (2-column tiles)
+        const iapContainer = document.getElementById('shop-iap-grid');
+        if (iapContainer && typeof IAP_GOLD_PACKS !== 'undefined') {
+            iapContainer.innerHTML = '';
+            IAP_GOLD_PACKS.forEach(pack => {
+                const card = document.createElement('div');
+                card.className = 'shop-iap-card';
+                card.innerHTML = `
+                    ${pack.badge ? `<div class="shop-iap-badge">${pack.badge}</div>` : ''}
+                    <div class="shop-iap-icon-wrap">${pack.icon}</div>
+                    <div class="shop-iap-title">${pack.name}</div>
+                    <div class="shop-iap-amount">+${pack.coins.toLocaleString('hu-HU')} <span class="gold-icon"></span></div>
+                    <button class="btn-shop-iap" data-pack="${pack.id}">
+                        ${pack.priceStr}
+                    </button>
+                `;
+                iapContainer.appendChild(card);
             });
-        });
+
+            iapContainer.querySelectorAll('.btn-shop-iap').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    this.buyIAPPack(btn.dataset.pack);
+                });
+            });
+        }
+
+        // Render Consumables & Boosters
+        const container = document.getElementById('shop-items-grid');
+        if (container) {
+            container.innerHTML = '';
+            SHOP_ITEMS_DEF.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'shop-item-card';
+
+                const ownedQty = (this.profile.inventory && this.profile.inventory[item.id]) || 0;
+
+                card.innerHTML = `
+                    <div class="shop-item-icon-wrap">${item.icon}</div>
+                    <div class="shop-item-qty-badge">${item.qty}</div>
+                    <div class="shop-item-title">${item.name}</div>
+                    <div class="shop-item-desc">${item.desc}</div>
+                    <button class="btn-shop-buy" data-item="${item.id}" data-price="${item.price}">
+                        <span>Vásárlás</span>
+                        <span>${item.price} <span class="gold-icon"></span></span>
+                    </button>
+                `;
+
+                container.appendChild(card);
+            });
+
+            container.querySelectorAll('.btn-shop-buy').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    this.buyShopItem(btn.dataset.item, parseInt(btn.dataset.price, 10));
+                });
+            });
+        }
 
         const dailyBtn = document.getElementById('btn-claim-daily');
         if (dailyBtn) {
@@ -1965,7 +2033,9 @@ class BlockBlasterApp {
 
         this.saveProfile();
         this.renderShop();
-        window.soundManager.playCoin();
+        if (window.soundManager && window.soundManager.playCoin) {
+            window.soundManager.playCoin();
+        }
         alert(`🎉 Sikeresen megvásároltad: ${itemDef.name} (${itemDef.qty})!`);
     }
 
@@ -1977,8 +2047,43 @@ class BlockBlasterApp {
         this.profile.lastDailyClaim = today;
         this.saveProfile();
         this.renderShop();
-        window.soundManager.playCoin();
+        if (window.soundManager && window.soundManager.playCoin) {
+            window.soundManager.playCoin();
+        }
         alert('🎉 Sikeresen átvetted a napi bónuszt: +100 Arany 🪙!');
+    }
+
+    watchRewardedAd() {
+        // Placeholder for AdMob / AppLovin / Unity Ads rewarded video SDK integration
+        const reward = 50;
+        const confirmAd = confirm(`🎬 Reklám megtekintése...\n\nSzeretnél megnézni egy 15-30 mp-es reklámvideót +${reward} Aranyért?`);
+        if (!confirmAd) return;
+
+        // Simulated ad watch callback
+        this.profile.coins = (this.profile.coins || 0) + reward;
+        this.saveProfile();
+        this.renderShop();
+        if (window.soundManager && window.soundManager.playCoin) {
+            window.soundManager.playCoin();
+        }
+        alert(`🎉 Köszönjük a reklám megtekintését!\nJutalmad: +${reward} Arany 🪙 jóváírva a kincstáradban!`);
+    }
+
+    buyIAPPack(packId) {
+        const pack = IAP_GOLD_PACKS.find(p => p.id === packId);
+        if (!pack) return;
+
+        // Placeholder for StoreKit / In-App Purchases integration (Capacitor/Cordova/Native)
+        const confirmBuy = confirm(`💳 App Store / Google Play Vásárlás Szimuláció:\n\nMegvásárolod a(z) "${pack.name}" csomagot (+${pack.coins.toLocaleString('hu-HU')} Arany) ${pack.priceStr} (${pack.usdStr}) áron?`);
+        if (!confirmBuy) return;
+
+        this.profile.coins = (this.profile.coins || 0) + pack.coins;
+        this.saveProfile();
+        this.renderShop();
+        if (window.soundManager && window.soundManager.playCoin) {
+            window.soundManager.playCoin();
+        }
+        alert(`🎉 Sikeres vásárlás!\n+${pack.coins.toLocaleString('hu-HU')} Arany jóváírva az egyenlegeden! Köszönjük a támogatást! 🌟`);
     }
 
     /* -------------------------------------------------------------

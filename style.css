@@ -649,50 +649,207 @@ body {
 /* =========================================
    SCREEN 2: BOLT (SHOP)
    ========================================= */
-.shop-daily-card {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(16, 185, 129, 0.2));
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    border-radius: 16px;
-    padding: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+/* Shop Free Rewards Grid (Daily Gift & Watch Ad) */
+.shop-free-rewards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
 }
 
-.daily-left {
+.shop-free-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95));
+    border: 1.5px solid rgba(245, 158, 11, 0.35);
+    border-radius: 14px;
+    padding: 12px 10px;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 12px;
+    text-align: center;
+    position: relative;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    transition: transform 0.15s ease, border-color 0.15s ease;
 }
 
-.daily-left h3 {
-    font-size: 1rem;
+.shop-free-card:hover {
+    border-color: #fbbf24;
+    transform: translateY(-2px);
+}
+
+.shop-ad-card {
+    border-color: rgba(56, 189, 248, 0.35);
+}
+
+.shop-ad-card:hover {
+    border-color: #38bdf8;
+}
+
+.free-card-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(245, 158, 11, 0.2);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: #fbbf24;
+    font-size: 0.6rem;
     font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 6px;
+    text-transform: uppercase;
 }
 
-.daily-left p {
-    font-size: 0.75rem;
+.ad-badge {
+    background: rgba(56, 189, 248, 0.2);
+    border-color: rgba(56, 189, 248, 0.4);
+    color: #38bdf8;
+}
+
+.free-card-icon {
+    font-size: 1.8rem;
+    margin-bottom: 4px;
+}
+
+.free-card-info h3 {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 2px;
+}
+
+.free-card-info p {
+    font-size: 0.68rem;
     color: var(--text-muted);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
 }
 
-.btn-shop-claim {
+.btn-free-claim {
+    width: 100%;
     background: linear-gradient(135deg, #10b981, #059669);
     color: #fff;
     border: none;
-    padding: 8px 16px;
-    border-radius: 10px;
-    font-weight: 700;
-    font-size: 0.85rem;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 0.75rem;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
+    transition: all 0.15s ease;
 }
 
-.btn-shop-claim.disabled {
+.btn-free-claim:active {
+    transform: scale(0.97);
+}
+
+.btn-free-claim.disabled {
     background: rgba(255, 255, 255, 0.1);
     color: var(--text-muted);
     box-shadow: none;
     cursor: not-allowed;
+}
+
+.btn-ad-claim {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.3);
+}
+
+/* IAP Gold Store Cards */
+.shop-iap-card {
+    background: linear-gradient(145deg, rgba(26, 32, 50, 0.9), rgba(16, 20, 32, 0.95));
+    border: 1.5px solid rgba(251, 191, 36, 0.3);
+    border-radius: 14px;
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.shop-iap-card:hover {
+    border-color: #fbbf24;
+    box-shadow: 0 6px 20px rgba(251, 191, 36, 0.25);
+    transform: translateY(-2px);
+}
+
+.shop-iap-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+}
+
+.shop-iap-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7rem;
+    margin-bottom: 6px;
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.4));
+}
+
+.shop-iap-title {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #e2e8f0;
+    margin-bottom: 2px;
+}
+
+.shop-iap-amount {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #fbbf24;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 2px;
+}
+
+.shop-iap-bonus {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #10b981;
+    min-height: 14px;
+    margin-bottom: 8px;
+}
+
+.btn-shop-iap {
+    width: 100%;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 4px;
+    font-size: 0.8rem;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
+    transition: all 0.15s ease;
+}
+
+.btn-shop-iap:active {
+    transform: scale(0.97);
 }
 
 .shop-subheading {
