@@ -1,0 +1,161 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/Main.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/screens/LobbyScreen.tscn" id="2_lobby"]
+[ext_resource type="PackedScene" path="res://scenes/screens/GameScreen.tscn" id="3_game"]
+[ext_resource type="PackedScene" path="res://scenes/screens/ShopScreen.tscn" id="4_shop"]
+[ext_resource type="PackedScene" path="res://scenes/screens/UpgradesScreen.tscn" id="5_upgrades"]
+[ext_resource type="PackedScene" path="res://scenes/screens/CodexScreen.tscn" id="6_codex"]
+[ext_resource type="PackedScene" path="res://scenes/screens/AchievementsScreen.tscn" id="7_ach"]
+[ext_resource type="PackedScene" path="res://scenes/screens/LeaderboardScreen.tscn" id="8_lb"]
+[ext_resource type="PackedScene" path="res://scenes/modals/GameOverModal.tscn" id="9_gameover"]
+[ext_resource type="PackedScene" path="res://scenes/modals/SettingsModal.tscn" id="10_settings"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.05, 0.08, 1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
+
+[node name="TopHeader" type="HBoxContainer" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="PlayerInfo" type="HBoxContainer" parent="VBoxContainer/TopHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Avatar" type="Label" parent="VBoxContainer/TopHeader/PlayerInfo"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "🧑‍🚀"
+
+[node name="Name" type="Label" parent="VBoxContainer/TopHeader/PlayerInfo"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Játékos"
+
+[node name="CoinsBadge" type="PanelContainer" parent="VBoxContainer/TopHeader"]
+custom_minimum_size = Vector2(90, 36)
+layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="VBoxContainer/TopHeader/CoinsBadge"]
+layout_mode = 2
+alignment = 1
+
+[node name="Icon" type="Label" parent="VBoxContainer/TopHeader/CoinsBadge/HBox"]
+layout_mode = 2
+text = "🪙"
+
+[node name="CoinCount" type="Label" parent="VBoxContainer/TopHeader/CoinsBadge/HBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "150"
+
+[node name="BtnCodex" type="Button" parent="VBoxContainer/TopHeader"]
+custom_minimum_size = Vector2(40, 36)
+layout_mode = 2
+text = "📖"
+
+[node name="BtnSettings" type="Button" parent="VBoxContainer/TopHeader"]
+custom_minimum_size = Vector2(40, 36)
+layout_mode = 2
+text = "⚙️"
+
+[node name="ScreenContainer" type="PanelContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LobbyScreen" parent="VBoxContainer/ScreenContainer" instance=ExtResource("2_lobby")]
+layout_mode = 2
+
+[node name="GameScreen" parent="VBoxContainer/ScreenContainer" instance=ExtResource("3_game")]
+visible = false
+layout_mode = 2
+
+[node name="ShopScreen" parent="VBoxContainer/ScreenContainer" instance=ExtResource("4_shop")]
+visible = false
+layout_mode = 2
+
+[node name="UpgradesScreen" parent="VBoxContainer/ScreenContainer" instance=ExtResource("5_upgrades")]
+visible = false
+layout_mode = 2
+
+[node name="CodexScreen" parent="VBoxContainer/ScreenContainer" instance=ExtResource("6_codex")]
+visible = false
+layout_mode = 2
+
+[node name="AchievementsScreen" parent="VBoxContainer/ScreenContainer" instance=ExtResource("7_ach")]
+visible = false
+layout_mode = 2
+
+[node name="LeaderboardScreen" parent="VBoxContainer/ScreenContainer" instance=ExtResource("8_lb")]
+visible = false
+layout_mode = 2
+
+[node name="BottomNav" type="HBoxContainer" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="BtnLobby" type="Button" parent="VBoxContainer/BottomNav"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🏠 Lobby"
+
+[node name="BtnShop" type="Button" parent="VBoxContainer/BottomNav"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🛒 Bolt"
+
+[node name="BtnUpgrades" type="Button" parent="VBoxContainer/BottomNav"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "⚡ Fejleszt"
+
+[node name="BtnCodex" type="Button" parent="VBoxContainer/BottomNav"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "📖 Kódex"
+
+[node name="BtnAch" type="Button" parent="VBoxContainer/BottomNav"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "⭐ Küldetés"
+
+[node name="BtnLeaderboard" type="Button" parent="VBoxContainer/BottomNav"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🏆 Rangsor"
+
+[node name="GameOverModal" parent="." instance=ExtResource("9_gameover")]
+visible = false
+layout_mode = 1
+
+[node name="SettingsModal" parent="." instance=ExtResource("10_settings")]
+visible = false
+layout_mode = 1

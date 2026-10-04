@@ -1,0 +1,134 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/LobbyScreen.gd" id="1_script"]
+
+[node name="LobbyScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="HeroBanner" type="PanelContainer" parent="ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 140)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="ScrollContainer/VBoxContainer/HeroBanner"]
+layout_mode = 2
+alignment = 1
+
+[node name="Title" type="Label" parent="ScrollContainer/VBoxContainer/HeroBanner/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "🚀 BLOCK VENTURE"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="ScrollContainer/VBoxContainer/HeroBanner/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "Helyezd le a blokkokat és törölj sorokat!"
+horizontal_alignment = 1
+
+[node name="DailyRewardCard" type="PanelContainer" parent="ScrollContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="ScrollContainer/VBoxContainer/DailyRewardCard"]
+layout_mode = 2
+
+[node name="Icon" type="Label" parent="ScrollContainer/VBoxContainer/DailyRewardCard/HBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "🎁 "
+
+[node name="Info" type="VBoxContainer" parent="ScrollContainer/VBoxContainer/DailyRewardCard/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="ScrollContainer/VBoxContainer/DailyRewardCard/HBox/Info"]
+layout_mode = 2
+text = "Napi Bónusz"
+
+[node name="Desc" type="Label" parent="ScrollContainer/VBoxContainer/DailyRewardCard/HBox/Info"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.8, 0.2, 1)
+text = "+100 Arany 🪙 ingyen"
+
+[node name="BtnClaim" type="Button" parent="ScrollContainer/VBoxContainer/DailyRewardCard/HBox"]
+custom_minimum_size = Vector2(100, 35)
+layout_mode = 2
+text = "Átvétel 🎁"
+
+[node name="ModeCards" type="VBoxContainer" parent="ScrollContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ClassicCard" type="PanelContainer" parent="ScrollContainer/VBoxContainer/ModeCards"]
+custom_minimum_size = Vector2(0, 110)
+layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="ScrollContainer/VBoxContainer/ModeCards/ClassicCard"]
+layout_mode = 2
+
+[node name="Info" type="VBoxContainer" parent="ScrollContainer/VBoxContainer/ModeCards/ClassicCard/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="Title" type="Label" parent="ScrollContainer/VBoxContainer/ModeCards/ClassicCard/HBox/Info"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "🕹️ Klasszikus Mód"
+
+[node name="BestLabel" type="Label" parent="ScrollContainer/VBoxContainer/ModeCards/ClassicCard/HBox/Info"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+text = "Rekord: 0"
+
+[node name="BtnPlay" type="Button" parent="ScrollContainer/VBoxContainer/ModeCards/ClassicCard/HBox"]
+custom_minimum_size = Vector2(110, 45)
+layout_mode = 2
+size_flags_vertical = 4
+text = "Játék ▶"
+
+[node name="AdventureCard" type="PanelContainer" parent="ScrollContainer/VBoxContainer/ModeCards"]
+custom_minimum_size = Vector2(0, 110)
+layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="ScrollContainer/VBoxContainer/ModeCards/AdventureCard"]
+layout_mode = 2
+
+[node name="Info" type="VBoxContainer" parent="ScrollContainer/VBoxContainer/ModeCards/AdventureCard/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="Title" type="Label" parent="ScrollContainer/VBoxContainer/ModeCards/AdventureCard/HBox/Info"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "🚀 Kaland Mód"
+
+[node name="BestLabel" type="Label" parent="ScrollContainer/VBoxContainer/ModeCards/AdventureCard/HBox/Info"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+text = "Rekord: 0"
+
+[node name="BtnPlay" type="Button" parent="ScrollContainer/VBoxContainer/ModeCards/AdventureCard/HBox"]
+custom_minimum_size = Vector2(110, 45)
+layout_mode = 2
+size_flags_vertical = 4
+text = "Indulás 🚀"

@@ -1,0 +1,197 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/GameScreen.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/components/Board.tscn" id="2_board"]
+[ext_resource type="PackedScene" path="res://scenes/components/Dock.tscn" id="3_dock"]
+
+[node name="GameScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="HeaderBar" type="HBoxContainer" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="ScoreCard" type="PanelContainer" parent="VBoxContainer/HeaderBar"]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="VBoxContainer/HeaderBar/ScoreCard"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/HeaderBar/ScoreCard/HBox"]
+layout_mode = 2
+text = "Pont: "
+
+[node name="ScoreValue" type="Label" parent="VBoxContainer/HeaderBar/ScoreCard/HBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "0"
+
+[node name="BestCard" type="PanelContainer" parent="VBoxContainer/HeaderBar"]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="VBoxContainer/HeaderBar/BestCard"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/HeaderBar/BestCard/HBox"]
+layout_mode = 2
+text = "Rekord: "
+
+[node name="BestValue" type="Label" parent="VBoxContainer/HeaderBar/BestCard/HBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "0"
+
+[node name="AdventureBar" type="HBoxContainer" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/AdventureBar"]
+layout_mode = 2
+text = "⏳ Hátralévő Lépések: "
+
+[node name="MovesValue" type="Label" parent="VBoxContainer/AdventureBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "10"
+
+[node name="ComboBanner" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.6, 0.1, 1)
+theme_override_font_sizes/font_size = 20
+text = "COMBO x2! 🔥"
+horizontal_alignment = 1
+
+[node name="TargetingBanner" type="HBoxContainer" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/TargetingBanner"]
+layout_mode = 2
+text = "💣 Válassz egy 3x3-as területet a táblán!"
+
+[node name="BtnCancel" type="Button" parent="VBoxContainer/TargetingBanner"]
+layout_mode = 2
+text = "Mégse ✕"
+
+[node name="BoardContainer" type="CenterContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Board" parent="VBoxContainer/BoardContainer" instance=ExtResource("2_board")]
+layout_mode = 2
+
+[node name="PowerupsBar" type="HBoxContainer" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="BtnBomb" type="Button" parent="VBoxContainer/PowerupsBar"]
+custom_minimum_size = Vector2(70, 45)
+layout_mode = 2
+text = "💣"
+
+[node name="Badge" type="Label" parent="VBoxContainer/PowerupsBar/BtnBomb"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -15.0
+offset_bottom = 20.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 12
+text = "0"
+
+[node name="BtnReroll" type="Button" parent="VBoxContainer/PowerupsBar"]
+custom_minimum_size = Vector2(70, 45)
+layout_mode = 2
+text = "🔄"
+
+[node name="Badge" type="Label" parent="VBoxContainer/PowerupsBar/BtnReroll"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -15.0
+offset_bottom = 20.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 12
+text = "0"
+
+[node name="BtnMoves" type="Button" parent="VBoxContainer/PowerupsBar"]
+custom_minimum_size = Vector2(70, 45)
+layout_mode = 2
+text = "⏳"
+
+[node name="Badge" type="Label" parent="VBoxContainer/PowerupsBar/BtnMoves"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -15.0
+offset_bottom = 20.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 12
+text = "0"
+
+[node name="BtnMagnet" type="Button" parent="VBoxContainer/PowerupsBar"]
+custom_minimum_size = Vector2(70, 45)
+layout_mode = 2
+text = "🧲"
+
+[node name="Badge" type="Label" parent="VBoxContainer/PowerupsBar/BtnMagnet"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -15.0
+offset_bottom = 20.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 12
+text = "0"
+
+[node name="BtnShield" type="Button" parent="VBoxContainer/PowerupsBar"]
+custom_minimum_size = Vector2(70, 45)
+layout_mode = 2
+text = "🛡️"
+
+[node name="Badge" type="Label" parent="VBoxContainer/PowerupsBar/BtnShield"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -15.0
+offset_bottom = 20.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 12
+text = "0"
+
+[node name="DockContainer" type="CenterContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Dock" parent="VBoxContainer/DockContainer" instance=ExtResource("3_dock")]
+layout_mode = 2
