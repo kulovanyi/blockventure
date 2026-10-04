@@ -30,7 +30,7 @@
 
     --player-bar-height: calc(52px + var(--sat));
     --nav-height: calc(56px + var(--sab));
-    --board-size: min(84vw, 360px, calc(100dvh - var(--player-bar-height) - 220px));
+    --board-size: min(88vw, 370px, calc(100dvh - var(--player-bar-height) - 230px));
     --cell-gap: 5px;
 }
 
@@ -1361,22 +1361,54 @@ body {
     100% { transform: scale(1); }
 }
 
-.adventure-obj-bar {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(59, 130, 246, 0.2));
-    border: 1px solid rgba(245, 158, 11, 0.3);
-    border-radius: 10px;
-    padding: 6px 12px;
+.adventure-bar {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(59, 130, 246, 0.25));
+    border: 1.5px solid rgba(245, 158, 11, 0.4);
+    border-radius: 12px;
+    padding: 6px 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.8rem;
-    font-weight: 700;
     margin-bottom: 4px;
     flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.15);
 }
 
-.obj-text { color: #fbbf24; }
-.moves-text { color: #60a5fa; }
+.moves-badge-main {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.moves-icon {
+    font-size: 1.15rem;
+}
+
+.moves-label {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #fbbf24;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.moves-number {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #fff;
+    background: rgba(245, 158, 11, 0.35);
+    padding: 2px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(251, 191, 36, 0.6);
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.6);
+}
+
+.moves-sub-info {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #60a5fa;
+}
 
 .combo-banner {
     height: 18px;
@@ -1405,19 +1437,20 @@ body {
     100% { transform: scale(1.08); }
 }
 
-/* Targeting Banner for Skills */
+/* Targeting Banner for Skills / Bomb */
 .targeting-banner {
     background: linear-gradient(135deg, #ef4444, #dc2626);
     color: #fff;
     border-radius: 10px;
-    padding: 8px 14px;
+    padding: 6px 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     animation: fadeIn 0.2s ease;
+    flex-shrink: 0;
 }
 
 .btn-cancel-action {
@@ -1430,12 +1463,88 @@ body {
     cursor: pointer;
 }
 
+/* In-Game Powerups / Helpers Bar (Adventure Mode) */
+.ingame-powerups-bar {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    margin: 4px 0 2px 0;
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.ingame-powerup-btn {
+    flex: 1;
+    background: rgba(22, 29, 46, 0.85);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 5px 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.15s ease;
+}
+
+.ingame-powerup-btn:hover:not(:disabled) {
+    border-color: #fbbf24;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.25);
+}
+
+.ingame-powerup-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.ingame-powerup-btn.active {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.25);
+    animation: pulseCombo 0.6s infinite alternate;
+}
+
+.ingame-powerup-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    filter: grayscale(0.8);
+}
+
+.pup-badge {
+    position: absolute;
+    top: -4px;
+    right: -2px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #000;
+    font-size: 0.65rem;
+    font-weight: 900;
+    padding: 1px 5px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+}
+
+.pup-icon {
+    font-size: 1.25rem;
+    margin-bottom: 2px;
+}
+
+.pup-name {
+    font-size: 0.62rem;
+    font-weight: 800;
+    color: #e2e8f0;
+}
+
 /* Board Area */
 .board-wrapper {
     position: relative;
     width: var(--board-size);
     height: var(--board-size);
-    margin: 0 auto;
+    margin: auto auto;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .board {
@@ -1787,9 +1896,16 @@ body.in-game .main-content {
 }
 
 /* Non-scrollable Screen Views (Lobby, Game) */
-#view-lobby,
+#view-lobby {
+    height: 100%;
+    overflow: hidden;
+}
+
 #view-game {
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     overflow: hidden;
 }
 

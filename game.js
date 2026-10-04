@@ -51,6 +51,7 @@ const SHOP_ITEMS_DEF = [
         name: 'Bomba Készlet',
         icon: '💣',
         qty: '3 db',
+        amount: 3,
         price: 150,
         desc: 'Felrobbant egy 3x3-as területet szorult helyzetekben.'
     },
@@ -59,6 +60,7 @@ const SHOP_ITEMS_DEF = [
         name: 'Forma Újradobó',
         icon: '🔄',
         qty: '5 db',
+        amount: 5,
         price: 100,
         desc: 'Újra cseréli a dokkolóban lévő 3 lehelyezhető alakzatot.'
     },
@@ -67,6 +69,7 @@ const SHOP_ITEMS_DEF = [
         name: 'Extra Lépések',
         icon: '⏳',
         qty: '+10 Lépés',
+        amount: 10,
         price: 200,
         desc: 'Azonnali bónusz lépéseket ad Kaland módban.'
     },
@@ -75,6 +78,7 @@ const SHOP_ITEMS_DEF = [
         name: 'Kvantum Mágnes',
         icon: '🧲',
         qty: '2 db',
+        amount: 2,
         price: 250,
         desc: 'Eltávolítja az összes azonos színű blokkot a tábláról.'
     },
@@ -83,6 +87,7 @@ const SHOP_ITEMS_DEF = [
         name: 'Védőpajzs',
         icon: '🛡️',
         qty: '2 db',
+        amount: 2,
         price: 300,
         desc: 'Megvéd a vereségtől és kitisztítja a pálya közepét.'
     },
@@ -91,6 +96,7 @@ const SHOP_ITEMS_DEF = [
         name: 'Kincses Zsák',
         icon: '💰',
         qty: '500 Érme',
+        amount: 500,
         price: 350,
         desc: 'Kincsesláda azonnali fejlesztések vásárlásához.'
     }
@@ -627,6 +633,8 @@ class BlockBlasterApp {
                     cell.className = 'cell';
                     cell.dataset.row = r;
                     cell.dataset.col = c;
+                    cell.addEventListener('pointerenter', () => this.onCellHover(r, c));
+                    cell.addEventListener('click', () => this.onCellClick(r, c));
                     this.boardEl.appendChild(cell);
                 }
             }
@@ -637,10 +645,14 @@ class BlockBlasterApp {
         this.dockSlots = [document.getElementById('slot-0'), document.getElementById('slot-1'), document.getElementById('slot-2')];
         this.dragGhost = document.getElementById('drag-ghost');
         this.gameOverModal = document.getElementById('game-over-modal');
-        this.adventureObjBar = document.getElementById('adventure-objective-bar');
-        this.movesLeftDisplay = document.getElementById('moves-left-display');
+        this.adventureObjBar = document.getElementById('adventure-obj-bar');
+        this.movesLeftDisplay = document.getElementById('adventure-moves');
         this.movesUpgradeInfo = document.getElementById('moves-upgrade-info');
+        this.inGamePowerups = document.getElementById('in-game-powerups');
+        this.targetingBanner = document.getElementById('targeting-banner');
+        this.targetingText = document.getElementById('targeting-text');
         this.settingsModal = document.getElementById('settings-modal');
+        this.activePowerup = null;
         this.initLobbyGridCanvas();
     }
 
@@ -871,6 +883,14 @@ class BlockBlasterApp {
         this.bindClick('tab-lb-classic', () => { this.lbCurrentTab = 'classic'; this.renderLeaderboard(); });
         this.bindClick('tab-lb-adventure', () => { this.lbCurrentTab = 'adventure'; this.renderLeaderboard(); });
         this.bindClick('btn-claim-daily', () => this.claimDailyReward());
+
+        // In-game Helpers / Powerups Bindings
+        this.bindClick('btn-powerup-bomb', () => this.activatePowerup('bomb'));
+        this.bindClick('btn-powerup-reroll', () => this.activatePowerup('reroll'));
+        this.bindClick('btn-powerup-moves', () => this.activatePowerup('moves'));
+        this.bindClick('btn-powerup-magnet', () => this.activatePowerup('magnet'));
+        this.bindClick('btn-powerup-shield', () => this.activatePowerup('shield'));
+        this.bindClick('btn-cancel-powerup', () => this.cancelActivePowerup());
 
         // Codex & Mysterious Books Bindings
         this.bindClick('btn-top-codex', () => this.openCodex());
@@ -1179,6 +1199,7 @@ class BlockBlasterApp {
         this.gameMode = mode;
         this.switchScreen('view-game');
         window.soundManager.playClick();
+        this.cancelActivePowerup();
         this.grid = Array(8).fill(null).map(() => Array(8).fill(null));
         this.score = 0;
         this.comboStreak = 0;
@@ -1192,6 +1213,7 @@ class BlockBlasterApp {
             if (targetTitle) targetTitle.textContent = 'Rekord 🏆';
             if (this.highScoreEl) this.highScoreEl.textContent = (this.profile.classicBest || 0).toLocaleString();
             if (this.adventureObjBar) this.adventureObjBar.style.display = 'none';
+            if (this.inGamePowerups) this.inGamePowerups.style.display = 'none';
         } else {
             if (modeBadge) modeBadge.textContent = '🚀 Kaland Mód';
             if (scoreTitle) scoreTitle.textContent = 'Pontszám';
@@ -1199,7 +1221,9 @@ class BlockBlasterApp {
             if (this.highScoreEl) this.highScoreEl.textContent = (this.profile.adventureBest || 0).toLocaleString();
             this.movesLeft = 10 + (this.profile.upgrades.extraMoves || 0);
             if (this.adventureObjBar) this.adventureObjBar.style.display = 'flex';
+            if (this.inGamePowerups) this.inGamePowerups.style.display = 'flex';
             this.updateAdventureObjUI();
+            this.updateInGamePowerupsUI();
         }
         this.renderBoard();
         this.updateScoreDisplay();
@@ -1209,12 +1233,232 @@ class BlockBlasterApp {
     }
 
     updateAdventureObjUI() {
-        if (this.movesLeftDisplay) this.movesLeftDisplay.textContent = `⏳ Hátralévő lépések: ${this.movesLeft}`;
+        if (this.movesLeftDisplay) this.movesLeftDisplay.textContent = this.movesLeft;
         if (this.movesUpgradeInfo) {
             const extraMoves = this.profile.upgrades.extraMoves || 0;
-            const skipChance = (this.profile.upgrades.skipChance || 0) * 0.2;
-            this.movesUpgradeInfo.textContent = `✨ +${extraMoves} Lépés | ${skipChance.toFixed(1)}% Ingyen`;
+            const skipChance = ((this.profile.upgrades.skipChance || 0) * 0.4).toFixed(1);
+            this.movesUpgradeInfo.textContent = `✨ +${extraMoves} Lépés | ${skipChance}% Ingyen`;
         }
+    }
+
+    updateInGamePowerupsUI() {
+        const inv = this.profile.inventory || {};
+        const list = [
+            { id: 'item_bomb', btnId: 'btn-powerup-bomb', badgeId: 'pup-qty-bomb' },
+            { id: 'item_reroll', btnId: 'btn-powerup-reroll', badgeId: 'pup-qty-reroll' },
+            { id: 'item_moves', btnId: 'btn-powerup-moves', badgeId: 'pup-qty-moves' },
+            { id: 'item_magnet', btnId: 'btn-powerup-magnet', badgeId: 'pup-qty-magnet' },
+            { id: 'item_shield', btnId: 'btn-powerup-shield', badgeId: 'pup-qty-shield' }
+        ];
+        list.forEach(p => {
+            const qty = inv[p.id] || 0;
+            const badge = document.getElementById(p.badgeId);
+            const btn = document.getElementById(p.btnId);
+            if (badge) badge.textContent = qty;
+            if (btn) {
+                btn.disabled = (qty <= 0);
+                btn.classList.toggle('active', this.activePowerup === p.id.replace('item_', ''));
+            }
+        });
+    }
+
+    activatePowerup(type) {
+        if (this.gameMode !== 'adventure') return;
+        const invKey = `item_${type}`;
+        const count = (this.profile.inventory && this.profile.inventory[invKey]) || 0;
+        if (count <= 0) {
+            alert('Nincs több ebből a segítségből! Szerezz be a Boltban 🛒');
+            return;
+        }
+
+        if (type === 'bomb') {
+            if (this.activePowerup === 'bomb') {
+                this.cancelActivePowerup();
+                return;
+            }
+            this.activePowerup = 'bomb';
+            if (this.targetingBanner) this.targetingBanner.style.display = 'flex';
+            if (this.targetingText) this.targetingText.textContent = '💣 Válassz egy 3x3-as területet a táblán!';
+            this.updateInGamePowerupsUI();
+            window.soundManager.playClick();
+        } else if (type === 'reroll') {
+            this.executeReroll();
+        } else if (type === 'moves') {
+            this.executeExtraMoves();
+        } else if (type === 'magnet') {
+            this.executeMagnet();
+        } else if (type === 'shield') {
+            this.executeShield();
+        }
+    }
+
+    cancelActivePowerup() {
+        this.activePowerup = null;
+        if (this.targetingBanner) this.targetingBanner.style.display = 'none';
+        this.clearBombHighlights();
+        this.updateInGamePowerupsUI();
+    }
+
+    onCellHover(r, c) {
+        if (this.activePowerup === 'bomb') {
+            this.highlightBombArea(r, c);
+        }
+    }
+
+    highlightBombArea(centerR, centerC) {
+        this.clearBombHighlights();
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+                const nr = centerR + dr;
+                const nc = centerC + dc;
+                if (nr >= 0 && nr < this.boardSize && nc >= 0 && nc < this.boardSize) {
+                    const cell = this.getCellElement(nr, nc);
+                    if (cell) cell.classList.add('targeting-hover');
+                }
+            }
+        }
+    }
+
+    clearBombHighlights() {
+        if (this.boardEl) {
+            this.boardEl.querySelectorAll('.cell.targeting-hover').forEach(c => c.classList.remove('targeting-hover'));
+        }
+    }
+
+    onCellClick(r, c) {
+        if (this.activePowerup === 'bomb') {
+            this.executeBomb(r, c);
+        }
+    }
+
+    executeBomb(centerR, centerC) {
+        if (!this.profile.inventory || (this.profile.inventory.item_bomb || 0) <= 0) return;
+        this.profile.inventory.item_bomb--;
+
+        let clearedCount = 0;
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+                const nr = centerR + dr;
+                const nc = centerC + dc;
+                if (nr >= 0 && nr < this.boardSize && nc >= 0 && nc < this.boardSize) {
+                    if (this.grid[nr][nc]) {
+                        if (this.grid[nr][nc].hasCoin) this.addCoins(10);
+                        this.grid[nr][nc] = null;
+                        clearedCount++;
+                    }
+                }
+            }
+        }
+
+        window.soundManager.playLineClear();
+        if (this.boardEl) this.boardEl.classList.add('shake');
+        setTimeout(() => { if (this.boardEl) this.boardEl.classList.remove('shake'); }, 300);
+
+        this.addScore(clearedCount * 15);
+        this.cancelActivePowerup();
+        this.saveProfile();
+        this.renderBoard();
+        this.updateDockAvailability();
+        this.showFloatingScore(`💣 -${clearedCount} Kocka!`);
+    }
+
+    executeReroll() {
+        if (!this.profile.inventory || (this.profile.inventory.item_reroll || 0) <= 0) return;
+        this.profile.inventory.item_reroll--;
+
+        for (let i = 0; i < 3; i++) {
+            this.spawnPieceInSlot(i);
+        }
+        window.soundManager.playLineClear();
+        this.saveProfile();
+        this.updateInGamePowerupsUI();
+        this.updateDockAvailability();
+        this.showFloatingScore(`🔄 Új formák!`);
+    }
+
+    executeExtraMoves() {
+        if (!this.profile.inventory || (this.profile.inventory.item_moves || 0) <= 0) return;
+        this.profile.inventory.item_moves--;
+
+        this.movesLeft += 5;
+        window.soundManager.playLevelUp();
+        this.updateAdventureObjUI();
+        this.saveProfile();
+        this.updateInGamePowerupsUI();
+        this.showFloatingScore(`⏳ +5 Lépés!`);
+    }
+
+    executeMagnet() {
+        if (!this.profile.inventory || (this.profile.inventory.item_magnet || 0) <= 0) return;
+
+        const colorCounts = {};
+        for (let r = 0; r < this.boardSize; r++) {
+            for (let c = 0; c < this.boardSize; c++) {
+                if (this.grid[r][c] && this.grid[r][c].color) {
+                    const col = this.grid[r][c].color;
+                    colorCounts[col] = (colorCounts[col] || 0) + 1;
+                }
+            }
+        }
+
+        let dominantColor = null;
+        let maxCount = 0;
+        for (const [col, count] of Object.entries(colorCounts)) {
+            if (count > maxCount) {
+                maxCount = count;
+                dominantColor = col;
+            }
+        }
+
+        if (!dominantColor || maxCount === 0) {
+            alert('A tábla jelenleg üres, nincs törölhető szín!');
+            return;
+        }
+
+        this.profile.inventory.item_magnet--;
+
+        let clearedCount = 0;
+        for (let r = 0; r < this.boardSize; r++) {
+            for (let c = 0; c < this.boardSize; c++) {
+                if (this.grid[r][c] && this.grid[r][c].color === dominantColor) {
+                    if (this.grid[r][c].hasCoin) this.addCoins(10);
+                    this.grid[r][c] = null;
+                    clearedCount++;
+                }
+            }
+        }
+
+        window.soundManager.playLineClear();
+        this.addScore(clearedCount * 20);
+        this.saveProfile();
+        this.updateInGamePowerupsUI();
+        this.renderBoard();
+        this.updateDockAvailability();
+        this.showFloatingScore(`🧲 -${clearedCount} Kocka!`);
+    }
+
+    executeShield() {
+        if (!this.profile.inventory || (this.profile.inventory.item_shield || 0) <= 0) return;
+        this.profile.inventory.item_shield--;
+
+        let clearedCount = 0;
+        for (let r = 2; r <= 5; r++) {
+            for (let c = 2; c <= 5; c++) {
+                if (this.grid[r][c]) {
+                    if (this.grid[r][c].hasCoin) this.addCoins(10);
+                    this.grid[r][c] = null;
+                    clearedCount++;
+                }
+            }
+        }
+
+        window.soundManager.playLevelUp();
+        this.addScore(clearedCount * 15);
+        this.saveProfile();
+        this.updateInGamePowerupsUI();
+        this.renderBoard();
+        this.updateDockAvailability();
+        this.showFloatingScore(`🛡️ Közép kitisztítva!`);
     }
 
     getRandomShape() {
@@ -1712,10 +1956,11 @@ class BlockBlasterApp {
 
         this.profile.coins -= price;
         if (!this.profile.inventory) this.profile.inventory = {};
-        this.profile.inventory[itemId] = (this.profile.inventory[itemId] || 0) + 1;
-
+        const addAmount = itemDef.amount || 1;
         if (itemId === 'item_chest') {
-            this.profile.coins += 500;
+            this.profile.coins += addAmount;
+        } else {
+            this.profile.inventory[itemId] = (this.profile.inventory[itemId] || 0) + addAmount;
         }
 
         this.saveProfile();

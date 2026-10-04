@@ -226,16 +226,57 @@
 
             <!-- Adventure Goals Bar (Only in Adventure Mode) -->
             <div id="adventure-obj-bar" class="adventure-bar" style="display: none;">
-                <div class="obj-text">Cél: <span id="adventure-target">0 / 500 pont</span></div>
-                <div class="moves-text">Lépések: <span id="adventure-moves">10</span></div>
+                <div class="moves-badge-main">
+                    <span class="moves-icon">⏳</span>
+                    <span class="moves-label">Lépések:</span>
+                    <strong id="adventure-moves" class="moves-number">10</strong>
+                </div>
+                <div class="moves-sub-info" id="moves-upgrade-info">
+                    ✨ +0 Lépés | 0.0% Ingyen
+                </div>
             </div>
 
             <!-- Combo & Streak Banner -->
             <div id="combo-banner" class="combo-banner">COMBO x2! 🔥</div>
 
+            <!-- Targeting Banner for Powerups -->
+            <div id="targeting-banner" class="targeting-banner" style="display: none;">
+                <span id="targeting-text">💣 Válassz egy 3x3-as területet a táblán!</span>
+                <button id="btn-cancel-powerup" class="btn-cancel-action">Mégse ✕</button>
+            </div>
+
             <!-- 8x8 Board Container -->
             <div class="board-wrapper">
                 <div id="board" class="board"></div>
+            </div>
+
+            <!-- In-Game Powerups / Helpers Bar (Adventure Mode) -->
+            <div id="in-game-powerups" class="ingame-powerups-bar" style="display: none;">
+                <button class="ingame-powerup-btn" id="btn-powerup-bomb" title="Bomba (3x3 robbantás)">
+                    <span class="pup-badge" id="pup-qty-bomb">0</span>
+                    <span class="pup-icon">💣</span>
+                    <span class="pup-name">Bomba</span>
+                </button>
+                <button class="ingame-powerup-btn" id="btn-powerup-reroll" title="Újradobás (Új elemek)">
+                    <span class="pup-badge" id="pup-qty-reroll">0</span>
+                    <span class="pup-icon">🔄</span>
+                    <span class="pup-name">Újradob</span>
+                </button>
+                <button class="ingame-powerup-btn" id="btn-powerup-moves" title="+5 Extra Lépés">
+                    <span class="pup-badge" id="pup-qty-moves">0</span>
+                    <span class="pup-icon">⏳</span>
+                    <span class="pup-name">+5 Lépés</span>
+                </button>
+                <button class="ingame-powerup-btn" id="btn-powerup-magnet" title="Mágnes (Színtörlés)">
+                    <span class="pup-badge" id="pup-qty-magnet">0</span>
+                    <span class="pup-icon">🧲</span>
+                    <span class="pup-name">Mágnes</span>
+                </button>
+                <button class="ingame-powerup-btn" id="btn-powerup-shield" title="Védőpajzs (Közép tisztítás)">
+                    <span class="pup-badge" id="pup-qty-shield">0</span>
+                    <span class="pup-icon">🛡️</span>
+                    <span class="pup-name">Pajzs</span>
+                </button>
             </div>
 
             <!-- Draggable Pieces Dock -->
