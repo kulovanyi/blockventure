@@ -1,97 +1,82 @@
 extends Control
 
-signal cell_clicked(r: int, c: int)
-signal cell_hovered(r: int, c: int)
-
 var row: int = 0
 var col: int = 0
 var is_filled: bool = false
 var color_name: String = ""
-var has_coin: bool = false
-
-@onready var bg_rect: ColorRect = $BgRect
-@onready var coin_icon: Label = $CoinIcon
+var is_preview: bool = false
+var is_will_clear: bool = false
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(54, 54)
-	gui_input.connect(_on_gui_input)
-	mouse_entered.connect(_on_mouse_entered)
-	update_visual()
+	custom_minimum_size = Vector2(52, 52)
 
 func init_cell(r: int, c: int) -> void:
 	row = r
 	col = c
+	queue_redraw()
 
-func set_filled(col_name: String, with_coin: bool = false) -> void:
+func set_filled(col_name: String) -> void:
 	is_filled = true
 	color_name = col_name
-	has_coin = with_coin
-	update_visual()
+	is_preview = false
+	is_will_clear = false
+	scale = Vector2.ONE
+	modulate = Color.WHITE
+	queue_redraw()
 
 func clear_cell() -> void:
 	is_filled = false
 	color_name = ""
-	has_coin = false
-	update_visual()
+	is_preview = false
+	is_will_clear = false
+	scale = Vector2.ONE
+	modulate = Color.WHITE
+	queue_redraw()
 
-func update_visual() -> void:
-	if not is_inside_tree(): return
-	if is_filled:
-		var c = GameManager.COLOR_MAP.get(color_name, Color(0.2, 0.4, 0.8))
-		bg_rect.color = c
-		bg_rect.modulate = Color(1.1, 1.1, 1.1, 1.0)
-	else:
-		bg_rect.color = Color(1.0, 1.0, 1.0, 0.05)
-		bg_rect.modulate = Color(1.0, 1.0, 1.0, 1.0)
-		
-	coin_icon.visible = has_coin
-
-func set_preview(is_preview: bool) -> void:
+func set_preview(preview: bool) -> void:
 	if is_filled: return
-	if is_preview:
-		bg_rect.color = Color(1.0, 1.0, 1.0, 0.25)
-	else:
-		update_visual()
+	if is_preview != preview:
+		is_preview = preview
+		queue_redraw()
 
 func set_will_clear(will_clear: bool) -> void:
-	if will_clear:
-		var tween = create_tween()
-		tween.tween_property(bg_rect, "modulate", Color(2.0, 2.0, 1.5, 1.0), 0.15)
-	else:
-		bg_rect.modulate = Color(1.0, 1.0, 1.0, 1.0)
+	if not is_filled: return
+	if is_will_clear != will_clear:
+		is_will_clear = will_clear
+		queue_redraw()
 
-func set_targeting_hover(is_target: bool) -> void:
-	if is_target:
-		bg_rect.color = Color(0.94, 0.27, 0.27, 0.6)
-	else:
-		update_visual()
-
-func play_clear_anim() -> void:
-	var tween = create_tween()
-	tween.tween_property(self, "scale", Vector2(1.2, 1.2), 0.1)
-	tween.parallel().tween_property(bg_rect, "modulate", Color(3.0, 3.0, 3.0, 1.0), 0.1)
-	tween.tween_property(self, "scale", Vector2(0.0, 0.0), 0.15)
-	tween.tween_callback(func():
+func play_clear_animation() -> void:
+	var tw = create_tween()
+	tw.tween_property(self, "scale", Vector2(1.2, 1.2), 0.08)
+	tw.parallel().tween_property(self, "modulate", Color(2.5, 2.5, 2.5, 1.0), 0.08)
+	tw.tween_property(self, "scale", Vector2.ZERO, 0.12)
+	tw.tween_callback(func():
 		clear_cell()
-		scale = Vector2(1.0, 1.0)
 	)
 
-func play_bomb_anim() -> void:
-	var tween = create_tween()
-	bg_rect.color = Color(1.0, 0.4, 0.1, 1.0)
-	tween.tween_property(self, "scale", Vector2(1.3, 1.3), 0.12)
-	tween.parallel().tween_property(bg_rect, "modulate", Color(4.0, 2.0, 1.0, 1.0), 0.12)
-	tween.tween_property(self, "scale", Vector2(0.0, 0.0), 0.18)
-	tween.tween_callback(func():
-		clear_cell()
-		scale = Vector2(1.0, 1.0)
-	)
-
-func _on_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		emit_signal("cell_clicked", row, col)
-	elif event is InputEventScreenTouch and event.pressed:
-		emit_signal("cell_clicked", row, col)
-
-func _on_mouse_entered() -> void:
-	emit_signal("cell_hovered", row, col)
+func _draw() -> void:
+	var rect = Rect2(Vector2.ZERO, size)
+	var radius = 6.0
+	
+	if is_filled:
+		var c: Color = GameManager.COLORS.get(color_name, Color(0.2, 0.5, 0.9))
+		if is_will_clear:
+			c = c.lightened(0.4)
+			
+		# Main filled block
+		draw_rect(rect, c, true, -1.0)
+		
+		# Top/Left subtle 3D bevel shine
+		var shine_rect = Rect2(Vector2(2, 2), Vector2(size.x - 4, (size.y - 4) * 0.45))
+		draw_rect(shine_rect, Color(1, 1, 1, 0.22), true, -1.0)
+		
+		# Block border
+		draw_rect(rect, Color(1, 1, 1, 0.3), false, 1.0)
+	elif is_preview:
+		# Placement preview
+		draw_rect(rect, Color(1, 1, 1, 0.25), true, -1.0)
+		draw_rect(rect, Color(1, 1, 1, 0.5), false, 1.5)
+	else:
+		# Empty grid slot
+		draw_rect(rect, Color(1, 1, 1, 0.04), true, -1.0)
+		draw_rect(rect, Color(1, 1, 1, 0.08), false, 1.0)

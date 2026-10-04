@@ -1,15 +1,31 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=5 format=3]
 
-[ext_resource type="Script" path="res://scripts/Main.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://scenes/screens/LobbyScreen.tscn" id="2_lobby"]
-[ext_resource type="PackedScene" path="res://scenes/screens/GameScreen.tscn" id="3_game"]
-[ext_resource type="PackedScene" path="res://scenes/screens/ShopScreen.tscn" id="4_shop"]
-[ext_resource type="PackedScene" path="res://scenes/screens/UpgradesScreen.tscn" id="5_upgrades"]
-[ext_resource type="PackedScene" path="res://scenes/screens/CodexScreen.tscn" id="6_codex"]
-[ext_resource type="PackedScene" path="res://scenes/screens/AchievementsScreen.tscn" id="7_ach"]
-[ext_resource type="PackedScene" path="res://scenes/screens/LeaderboardScreen.tscn" id="8_lb"]
-[ext_resource type="PackedScene" path="res://scenes/modals/GameOverModal.tscn" id="9_gameover"]
-[ext_resource type="PackedScene" path="res://scenes/modals/SettingsModal.tscn" id="10_settings"]
+[ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
+[ext_resource type="PackedScene" path="res://scenes/Board.tscn" id="2_board"]
+[ext_resource type="PackedScene" path="res://scenes/Dock.tscn" id="3_dock"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_header"]
+bg_color = Color(0.1, 0.13, 0.2, 0.9)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_board_frame"]
+bg_color = Color(0.08, 0.1, 0.16, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -18,7 +34,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_script")
+script = ExtResource("1_main")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -27,7 +43,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.04, 0.05, 0.08, 1)
+color = Color(0.06, 0.08, 0.12, 1)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -36,126 +52,132 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 4
-
-[node name="TopHeader" type="HBoxContainer" parent="VBoxContainer"]
-custom_minimum_size = Vector2(0, 56)
-layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 16
 alignment = 1
 
-[node name="PlayerInfo" type="HBoxContainer" parent="VBoxContainer/TopHeader"]
+[node name="Header" type="HBoxContainer" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
-size_flags_horizontal = 3
+theme_override_constants/separation = 16
+alignment = 1
 
-[node name="Avatar" type="Label" parent="VBoxContainer/TopHeader/PlayerInfo"]
+[node name="ScoreCard" type="PanelContainer" parent="VBoxContainer/Header"]
+custom_minimum_size = Vector2(180, 56)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_header")
+
+[node name="HBox" type="HBoxContainer" parent="VBoxContainer/Header/ScoreCard"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/Header/ScoreCard/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 14
+text = "SCORE: "
+
+[node name="ScoreVal" type="Label" parent="VBoxContainer/Header/ScoreCard/HBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "🧑‍🚀"
+text = "0"
 
-[node name="Name" type="Label" parent="VBoxContainer/TopHeader/PlayerInfo"]
+[node name="BestCard" type="PanelContainer" parent="VBoxContainer/Header"]
+custom_minimum_size = Vector2(180, 56)
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_header")
+
+[node name="HBox" type="HBoxContainer" parent="VBoxContainer/Header/BestCard"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/Header/BestCard/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "👑 BEST: "
+
+[node name="BestVal" type="Label" parent="VBoxContainer/Header/BestCard/HBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "0"
+
+[node name="ComboBanner" type="Label" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.6, 0.15, 1)
+theme_override_font_sizes/font_size = 22
+text = "COMBO x2! 🔥"
+horizontal_alignment = 1
+
+[node name="BoardArea" type="CenterContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="BoardFrame" type="PanelContainer" parent="VBoxContainer/BoardArea"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_board_frame")
+
+[node name="Board" parent="VBoxContainer/BoardArea/BoardFrame" instance=ExtResource("2_board")]
+layout_mode = 2
+
+[node name="DockArea" type="CenterContainer" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 160)
+layout_mode = 2
+
+[node name="Dock" parent="VBoxContainer/DockArea" instance=ExtResource("3_dock")]
+layout_mode = 2
+
+[node name="GameOverModal" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.8)
+
+[node name="Panel" type="PanelContainer" parent="GameOverModal"]
+custom_minimum_size = Vector2(360, 240)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -120.0
+offset_right = 180.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="GameOverModal/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Title" type="Label" parent="GameOverModal/Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "💥 GAME OVER"
+horizontal_alignment = 1
+
+[node name="ScoreRow" type="HBoxContainer" parent="GameOverModal/Panel/VBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="GameOverModal/Panel/VBox/ScoreRow"]
+layout_mode = 2
+text = "Elért pontszám: "
+
+[node name="FinalScore" type="Label" parent="GameOverModal/Panel/VBox/ScoreRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "0"
+
+[node name="BtnRestart" type="Button" parent="GameOverModal/Panel/VBox"]
+custom_minimum_size = Vector2(160, 48)
+layout_mode = 2
+size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
-text = "Játékos"
-
-[node name="CoinsBadge" type="PanelContainer" parent="VBoxContainer/TopHeader"]
-custom_minimum_size = Vector2(90, 36)
-layout_mode = 2
-
-[node name="HBox" type="HBoxContainer" parent="VBoxContainer/TopHeader/CoinsBadge"]
-layout_mode = 2
-alignment = 1
-
-[node name="Icon" type="Label" parent="VBoxContainer/TopHeader/CoinsBadge/HBox"]
-layout_mode = 2
-text = "🪙"
-
-[node name="CoinCount" type="Label" parent="VBoxContainer/TopHeader/CoinsBadge/HBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "150"
-
-[node name="BtnCodex" type="Button" parent="VBoxContainer/TopHeader"]
-custom_minimum_size = Vector2(40, 36)
-layout_mode = 2
-text = "📖"
-
-[node name="BtnSettings" type="Button" parent="VBoxContainer/TopHeader"]
-custom_minimum_size = Vector2(40, 36)
-layout_mode = 2
-text = "⚙️"
-
-[node name="ScreenContainer" type="PanelContainer" parent="VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="LobbyScreen" parent="VBoxContainer/ScreenContainer" instance=ExtResource("2_lobby")]
-layout_mode = 2
-
-[node name="GameScreen" parent="VBoxContainer/ScreenContainer" instance=ExtResource("3_game")]
-visible = false
-layout_mode = 2
-
-[node name="ShopScreen" parent="VBoxContainer/ScreenContainer" instance=ExtResource("4_shop")]
-visible = false
-layout_mode = 2
-
-[node name="UpgradesScreen" parent="VBoxContainer/ScreenContainer" instance=ExtResource("5_upgrades")]
-visible = false
-layout_mode = 2
-
-[node name="CodexScreen" parent="VBoxContainer/ScreenContainer" instance=ExtResource("6_codex")]
-visible = false
-layout_mode = 2
-
-[node name="AchievementsScreen" parent="VBoxContainer/ScreenContainer" instance=ExtResource("7_ach")]
-visible = false
-layout_mode = 2
-
-[node name="LeaderboardScreen" parent="VBoxContainer/ScreenContainer" instance=ExtResource("8_lb")]
-visible = false
-layout_mode = 2
-
-[node name="BottomNav" type="HBoxContainer" parent="VBoxContainer"]
-custom_minimum_size = Vector2(0, 56)
-layout_mode = 2
-theme_override_constants/separation = 4
-alignment = 1
-
-[node name="BtnLobby" type="Button" parent="VBoxContainer/BottomNav"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "🏠 Lobby"
-
-[node name="BtnShop" type="Button" parent="VBoxContainer/BottomNav"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "🛒 Bolt"
-
-[node name="BtnUpgrades" type="Button" parent="VBoxContainer/BottomNav"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "⚡ Fejleszt"
-
-[node name="BtnCodex" type="Button" parent="VBoxContainer/BottomNav"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "📖 Kódex"
-
-[node name="BtnAch" type="Button" parent="VBoxContainer/BottomNav"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "⭐ Küldetés"
-
-[node name="BtnLeaderboard" type="Button" parent="VBoxContainer/BottomNav"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "🏆 Rangsor"
-
-[node name="GameOverModal" parent="." instance=ExtResource("9_gameover")]
-visible = false
-layout_mode = 1
-
-[node name="SettingsModal" parent="." instance=ExtResource("10_settings")]
-visible = false
-layout_mode = 1
+text = "🔄 Új Játék"

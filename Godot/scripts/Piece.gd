@@ -4,46 +4,48 @@ signal drag_started(piece_data: Dictionary)
 signal drag_updated(global_pos: Vector2)
 signal drag_ended(piece_data: Dictionary, global_pos: Vector2)
 
+const BLOCK_SIZE: float = 34.0
+const BLOCK_GAP: float = 3.0
+
 var piece_data: Dictionary = {}
 var is_dragging: bool = false
 var original_pos: Vector2 = Vector2.ZERO
-var drag_offset: Vector2 = Vector2(0, -60) # Lift up above finger
-
-@onready var grid_container: GridContainer = $GridContainer
+var drag_offset_y: float = -70.0 # Lift shape above finger
 
 func _ready() -> void:
 	gui_input.connect(_on_gui_input)
 
 func init_piece(data: Dictionary) -> void:
 	piece_data = data
-	_render_piece()
-
-func _render_piece() -> void:
-	for child in grid_container.get_children():
-		child.queue_free()
-		
-	var matrix: Array = piece_data.get("matrix", [[1]])
-	var color_name: String = piece_data.get("color", "c-cyan")
-	var c_color = GameManager.COLOR_MAP.get(color_name, Color(0.2, 0.4, 0.8))
+	var matrix: Array = data.get("matrix", [[1]])
+	var rows = matrix.size()
+	var cols = matrix[0].size()
 	
-	grid_container.columns = matrix[0].size()
+	var w = cols * BLOCK_SIZE + (cols - 1) * BLOCK_GAP
+	var h = rows * BLOCK_SIZE + (rows - 1) * BLOCK_GAP
+	custom_minimum_size = Vector2(w, h)
+	size = custom_minimum_size
+	queue_redraw()
+
+func _draw() -> void:
+	var matrix: Array = piece_data.get("matrix", [])
+	var color_name: String = piece_data.get("color", "cyan")
+	var c: Color = GameManager.COLORS.get(color_name, Color(0.2, 0.5, 0.9))
 	
 	for r in range(matrix.size()):
-		for c in range(matrix[r].size()):
-			var val = matrix[r][c]
-			var block = ColorRect.new()
-			block.custom_minimum_size = Vector2(36, 36)
-			if val > 0:
-				block.color = c_color
-				if val == 2: # Coin block
-					var coin = Label.new()
-					coin.text = "🪙"
-					coin.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-					coin.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-					block.add_child(coin)
-			else:
-				block.color = Color(0, 0, 0, 0)
-			grid_container.add_child(block)
+		for col_idx in range(matrix[r].size()):
+			if matrix[r][col_idx] > 0:
+				var x = col_idx * (BLOCK_SIZE + BLOCK_GAP)
+				var y = r * (BLOCK_SIZE + BLOCK_GAP)
+				var rect = Rect2(Vector2(x, y), Vector2(BLOCK_SIZE, BLOCK_SIZE))
+				
+				# Main Block
+				draw_rect(rect, c, true, -1.0)
+				# 3D Shine
+				var shine = Rect2(Vector2(x + 2, y + 2), Vector2(BLOCK_SIZE - 4, (BLOCK_SIZE - 4) * 0.45))
+				draw_rect(shine, Color(1, 1, 1, 0.22), true, -1.0)
+				# Border
+				draw_rect(rect, Color(1, 1, 1, 0.3), false, 1.0)
 
 func _on_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
@@ -64,23 +66,25 @@ func _on_gui_input(event: InputEvent) -> void:
 func _start_drag(pos: Vector2) -> void:
 	is_dragging = true
 	original_pos = global_position
-	scale = Vector2(1.2, 1.2)
+	scale = Vector2(1.25, 1.25)
 	z_index = 50
-	SoundManager.play_pickup()
+	GameManager.play_sound_pickup()
 	emit_signal("drag_started", piece_data)
 	_update_drag(pos)
 
 func _update_drag(pos: Vector2) -> void:
-	global_position = pos + drag_offset - (size * scale * 0.5)
-	emit_signal("drag_updated", global_position + (size * scale * 0.5))
+	var center_offset = size * scale * 0.5
+	global_position = pos - center_offset + Vector2(0, drag_offset_y)
+	emit_signal("drag_updated", global_position + center_offset)
 
 func _end_drag(pos: Vector2) -> void:
 	if not is_dragging: return
 	is_dragging = false
 	z_index = 0
-	scale = Vector2(1.0, 1.0)
-	emit_signal("drag_ended", piece_data, global_position + (size * 0.5))
+	scale = Vector2.ONE
+	var center_pos = global_position + (size * 0.5)
+	emit_signal("drag_ended", piece_data, center_pos)
 
 func return_to_dock() -> void:
-	var tween = create_tween()
-	tween.tween_property(self, "global_position", original_pos, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	var tw = create_tween()
+	tw.tween_property(self, "global_position", original_pos, 0.16).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)

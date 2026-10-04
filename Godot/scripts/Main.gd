@@ -1,85 +1,113 @@
 extends Control
 
-# Header nodes
-@onready var lbl_player_name: Label = $VBoxContainer/TopHeader/PlayerInfo/Name
-@onready var lbl_avatar: Label = $VBoxContainer/TopHeader/PlayerInfo/Avatar
-@onready var lbl_coins: Label = $VBoxContainer/TopHeader/CoinsBadge/HBox/CoinCount
-@onready var btn_top_codex: Button = $VBoxContainer/TopHeader/BtnCodex
-@onready var btn_top_settings: Button = $VBoxContainer/TopHeader/BtnSettings
+@onready var lbl_score: Label = $VBoxContainer/Header/ScoreCard/HBox/ScoreVal
+@onready var lbl_best: Label = $VBoxContainer/Header/BestCard/HBox/BestVal
+@onready var board: GridContainer = $VBoxContainer/BoardArea/Board
+@onready var dock: HBoxContainer = $VBoxContainer/DockArea/Dock
+@onready var combo_banner: Label = $VBoxContainer/ComboBanner
+@onready var game_over_panel: ColorRect = $GameOverModal
+@onready var btn_restart: Button = $GameOverModal/Panel/VBox/BtnRestart
+@onready var lbl_final_score: Label = $GameOverModal/Panel/VBox/ScoreRow/FinalScore
 
-# Screen views
-@onready var screen_lobby: Control = $VBoxContainer/ScreenContainer/LobbyScreen
-@onready var screen_game: Control = $VBoxContainer/ScreenContainer/GameScreen
-@onready var screen_shop: Control = $VBoxContainer/ScreenContainer/ShopScreen
-@onready var screen_upgrades: Control = $VBoxContainer/ScreenContainer/UpgradesScreen
-@onready var screen_codex: Control = $VBoxContainer/ScreenContainer/CodexScreen
-@onready var screen_achievements: Control = $VBoxContainer/ScreenContainer/AchievementsScreen
-@onready var screen_leaderboard: Control = $VBoxContainer/ScreenContainer/LeaderboardScreen
-
-# Bottom Nav
-@onready var nav_lobby: Button = $VBoxContainer/BottomNav/BtnLobby
-@onready var nav_shop: Button = $VBoxContainer/BottomNav/BtnShop
-@onready var nav_upgrades: Button = $VBoxContainer/BottomNav/BtnUpgrades
-@onready var nav_codex: Button = $VBoxContainer/BottomNav/BtnCodex
-@onready var nav_achievements: Button = $VBoxContainer/BottomNav/BtnAch
-@onready var nav_leaderboard: Button = $VBoxContainer/BottomNav/BtnLeaderboard
-
-# Modals
-@onready var game_over_modal: Control = $GameOverModal
-@onready var settings_modal: Control = $SettingsModal
+var current_drag_data: Dictionary = {}
 
 func _ready() -> void:
-	SaveManager.profile_updated.connect(update_header)
-	SaveManager.coins_changed.connect(func(c): lbl_coins.text = str(c))
+	GameManager.score_changed.connect(_on_score_changed)
+	GameManager.high_score_changed.connect(_on_high_score_changed)
 	GameManager.game_over_triggered.connect(_on_game_over)
 	
-	screen_lobby.start_mode_selected.connect(_on_start_mode)
+	dock.piece_drag_started.connect(_on_piece_drag_started)
+	dock.piece_drag_updated.connect(_on_piece_drag_updated)
+	dock.piece_drag_ended.connect(_on_piece_drag_ended)
 	
-	game_over_modal.restart_requested.connect(func():
-		screen_game.start_game(GameManager.game_mode)
-	)
-	game_over_modal.lobby_requested.connect(func():
-		switch_screen("lobby")
-	)
-	settings_modal.exit_game_requested.connect(func():
-		switch_screen("lobby")
-	)
+	board.piece_placed.connect(_on_piece_placed)
+	board.lines_cleared.connect(_on_lines_cleared)
 	
-	btn_top_codex.pressed.connect(func(): switch_screen("codex"))
-	btn_top_settings.pressed.connect(func(): settings_modal.open())
+	btn_restart.pressed.connect(_start_new_game)
 	
-	nav_lobby.pressed.connect(func(): switch_screen("lobby"))
-	nav_shop.pressed.connect(func(): switch_screen("shop"))
-	nav_upgrades.pressed.connect(func(): switch_screen("upgrades"))
-	nav_codex.pressed.connect(func(): switch_screen("codex"))
-	nav_achievements.pressed.connect(func(): switch_screen("achievements"))
-	nav_leaderboard.pressed.connect(func(): switch_screen("leaderboard"))
+	game_over_panel.visible = false
+	combo_banner.visible = false
 	
-	game_over_modal.visible = false
-	settings_modal.visible = false
-	
-	update_header()
-	switch_screen("lobby")
+	_start_new_game()
 
-func update_header() -> void:
-	lbl_player_name.text = SaveManager.profile.get("playerName", "Játékos")
-	lbl_avatar.text = SaveManager.profile.get("avatarIcon", "🧑‍🚀")
-	lbl_coins.text = str(SaveManager.get_coins())
+func _start_new_game() -> void:
+	game_over_panel.visible = false
+	combo_banner.visible = false
+	GameManager.start_new_game()
+	board.reset_board()
+	dock.reset_dock()
+	lbl_score.text = "0"
+	lbl_best.text = str(GameManager.high_score)
 
-func switch_screen(screen_name: String) -> void:
-	SoundManager.play_click()
+func _on_score_changed(new_score: int) -> void:
+	lbl_score.text = str(new_score)
+
+func _on_high_score_changed(new_best: int) -> void:
+	lbl_best.text = str(new_best)
+
+func _on_lines_cleared(count: int, combo: int) -> void:
+	if combo > 1:
+		combo_banner.text = "COMBO x%d! 🔥" % combo
+		combo_banner.visible = true
+		var tw = create_tween()
+		tw.tween_property(combo_banner, "scale", Vector2(1.2, 1.2), 0.1)
+		tw.tween_property(combo_banner, "scale", Vector2.ONE, 0.1)
+		tw.tween_interval(1.0)
+		tw.tween_callback(func(): combo_banner.visible = false)
+	else:
+		combo_banner.visible = false
+
+func _on_piece_drag_started(data: Dictionary) -> void:
+	current_drag_data = data
+
+func _on_piece_drag_updated(pos: Vector2) -> void:
+	var target = _get_grid_target(pos)
+	if target != Vector2i(-1, -1):
+		board.show_preview(current_drag_data["matrix"], target.x, target.y)
+	else:
+		board.clear_preview()
+
+func _on_piece_drag_ended(data: Dictionary, pos: Vector2, slot_idx: int) -> void:
+	board.clear_preview()
+	var target = _get_grid_target(pos)
 	
-	screen_lobby.visible = (screen_name == "lobby")
-	screen_game.visible = (screen_name == "game")
-	screen_shop.visible = (screen_name == "shop")
-	screen_upgrades.visible = (screen_name == "upgrades")
-	screen_codex.visible = (screen_name == "codex")
-	screen_achievements.visible = (screen_name == "achievements")
-	screen_leaderboard.visible = (screen_name == "leaderboard")
+	if target != Vector2i(-1, -1):
+		var placed = board.place_piece(data, target.x, target.y)
+		if placed:
+			dock.remove_piece(slot_idx)
+			_check_game_over()
+			return
+			
+	# Invalid drop -> return to dock
+	var p = dock.slots[slot_idx]
+	if p and is_instance_valid(p):
+		p.return_to_dock()
 
-func _on_start_mode(mode: String) -> void:
-	switch_screen("game")
-	screen_game.start_game(mode)
+func _get_grid_target(global_pos: Vector2) -> Vector2i:
+	var board_rect = board.get_global_rect()
+	if not board_rect.has_point(global_pos):
+		return Vector2i(-1, -1)
+		
+	var local_pos = global_pos - board_rect.position
+	var cell_w = board_rect.size.x / float(GameManager.BOARD_SIZE)
+	var cell_h = board_rect.size.y / float(GameManager.BOARD_SIZE)
+	
+	var r = int(local_pos.y / cell_h)
+	var c = int(local_pos.x / cell_w)
+	
+	var matrix = current_drag_data.get("matrix", [[1]])
+	var offset_r = int(matrix.size() / 2)
+	var offset_c = int(matrix[0].size() / 2)
+	
+	return Vector2i(r - offset_r, c - offset_c)
 
-func _on_game_over(reason: String) -> void:
-	game_over_modal.show_modal(reason)
+func _on_piece_placed() -> void:
+	_check_game_over()
+
+func _check_game_over() -> void:
+	if not dock.has_playable_piece(board):
+		GameManager.trigger_game_over()
+
+func _on_game_over() -> void:
+	lbl_final_score.text = str(GameManager.score)
+	game_over_panel.visible = true
