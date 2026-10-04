@@ -558,6 +558,8 @@ class BlockBlasterApp {
         localStorage.setItem('blockBlaster_profile', JSON.stringify(this.profile));
         this.updateProfileUI();
         this.updateLobbyMeta();
+        this.updateInGamePowerupsUI();
+        this.renderShop();
     }
 
     addCoins(amount) {
@@ -673,11 +675,41 @@ class BlockBlasterApp {
                     cell.className = 'cell';
                     cell.dataset.row = r;
                     cell.dataset.col = c;
+                    
                     cell.addEventListener('pointerenter', () => this.onCellHover(r, c));
-                    cell.addEventListener('click', () => this.onCellClick(r, c));
+                    cell.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.onCellClick(r, c);
+                    });
+                    cell.addEventListener('pointerdown', (e) => {
+                        if (this.activePowerup === 'bomb') {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.executeBomb(r, c);
+                        }
+                    });
                     this.boardEl.appendChild(cell);
                 }
             }
+
+            // Also support smooth touch/pointer dragging over the board to highlight bomb targeting area
+            this.boardEl.addEventListener('pointermove', (e) => {
+                if (this.activePowerup === 'bomb') {
+                    const el = document.elementFromPoint(e.clientX, e.clientY);
+                    const cell = el ? el.closest('.cell') : null;
+                    if (cell && cell.dataset.row !== undefined) {
+                        const r = parseInt(cell.dataset.row, 10);
+                        const c = parseInt(cell.dataset.col, 10);
+                        this.highlightBombArea(r, c);
+                    }
+                }
+            });
+
+            this.boardEl.addEventListener('pointerleave', () => {
+                if (this.activePowerup === 'bomb') {
+                    this.clearBombHighlights();
+                }
+            });
         }
         this.scoreEl = document.getElementById('current-score');
         this.highScoreEl = document.getElementById('high-score');
@@ -1254,7 +1286,8 @@ class BlockBlasterApp {
             if (targetTitle) targetTitle.textContent = 'Rekord 🏆';
             if (this.highScoreEl) this.highScoreEl.textContent = (this.profile.classicBest || 0).toLocaleString();
             if (this.adventureObjBar) this.adventureObjBar.style.display = 'none';
-            if (this.inGamePowerups) this.inGamePowerups.style.display = 'none';
+            if (this.inGamePowerups) this.inGamePowerups.style.display = 'flex';
+            this.updateInGamePowerupsUI();
         } else {
             if (modeBadge) modeBadge.textContent = '🚀 Kaland Mód';
             if (scoreTitle) scoreTitle.textContent = 'Pontszám';
@@ -1304,7 +1337,6 @@ class BlockBlasterApp {
     }
 
     activatePowerup(type) {
-        if (this.gameMode !== 'adventure') return;
         const invKey = `item_${type}`;
         const count = (this.profile.inventory && this.profile.inventory[invKey]) || 0;
         if (count <= 0) {
@@ -1319,9 +1351,10 @@ class BlockBlasterApp {
             }
             this.activePowerup = 'bomb';
             if (this.targetingBanner) this.targetingBanner.style.display = 'flex';
-            if (this.targetingText) this.targetingText.textContent = '💣 Válassz egy 3x3-as területet a táblán!';
+            if (this.targetingText) this.targetingText.textContent = '💣 Kattints vagy koppints a táblára a 3x3 robbantáshoz!';
+            if (this.boardEl) this.boardEl.classList.add('bomb-targeting-mode');
             this.updateInGamePowerupsUI();
-            window.soundManager.playClick();
+            if (window.soundManager && window.soundManager.playClick) window.soundManager.playClick();
         } else if (type === 'reroll') {
             this.executeReroll();
         } else if (type === 'moves') {
@@ -1336,6 +1369,7 @@ class BlockBlasterApp {
     cancelActivePowerup() {
         this.activePowerup = null;
         if (this.targetingBanner) this.targetingBanner.style.display = 'none';
+        if (this.boardEl) this.boardEl.classList.remove('bomb-targeting-mode');
         this.clearBombHighlights();
         this.updateInGamePowerupsUI();
     }
@@ -1373,15 +1407,24 @@ class BlockBlasterApp {
     }
 
     executeBomb(centerR, centerC) {
-        if (!this.profile.inventory || (this.profile.inventory.item_bomb || 0) <= 0) return;
+        if (!this.profile.inventory || (this.profile.inventory.item_bomb || 0) <= 0) {
+            alert('Nincs több Bombád! Szerezz be a Boltban 🛒');
+            this.cancelActivePowerup();
+            return;
+        }
         this.profile.inventory.item_bomb--;
 
         let clearedCount = 0;
+        const blastCells = [];
+
         for (let dr = -1; dr <= 1; dr++) {
             for (let dc = -1; dc <= 1; dc++) {
                 const nr = centerR + dr;
                 const nc = centerC + dc;
                 if (nr >= 0 && nr < this.boardSize && nc >= 0 && nc < this.boardSize) {
+                    const cellEl = this.getCellElement(nr, nc);
+                    if (cellEl) blastCells.push(cellEl);
+
                     if (this.grid[nr][nc]) {
                         if (this.grid[nr][nc].hasCoin) this.addCoins(10);
                         this.grid[nr][nc] = null;
@@ -1391,46 +1434,80 @@ class BlockBlasterApp {
             }
         }
 
-        window.soundManager.playLineClear();
-        if (this.boardEl) this.boardEl.classList.add('shake');
-        setTimeout(() => { if (this.boardEl) this.boardEl.classList.remove('shake'); }, 300);
+        // Animate explosion on all 3x3 cells
+        blastCells.forEach(cell => {
+            cell.classList.add('bomb-exploding');
+        });
 
-        this.addScore(clearedCount * 15);
+        if (window.soundManager) {
+            if (window.soundManager.playExplosion) window.soundManager.playExplosion();
+            else if (window.soundManager.playClear) window.soundManager.playClear(3, 2);
+        }
+
+        if (this.boardEl) {
+            this.boardEl.classList.add('shake');
+            setTimeout(() => { if (this.boardEl) this.boardEl.classList.remove('shake'); }, 350);
+        }
+
+        this.addScore(clearedCount * 25 + 50);
         this.cancelActivePowerup();
         this.saveProfile();
-        this.renderBoard();
-        this.updateDockAvailability();
-        this.showFloatingScore(`💣 -${clearedCount} Kocka!`);
+
+        setTimeout(() => {
+            blastCells.forEach(cell => cell.classList.remove('bomb-exploding'));
+            this.renderBoard();
+            this.updateDockAvailability();
+        }, 320);
+
+        const remBombs = this.profile.inventory.item_bomb || 0;
+        this.showFloatingScore(`💣 BUMM! -${clearedCount} Kocka (${remBombs} maradt)`);
     }
 
     executeReroll() {
-        if (!this.profile.inventory || (this.profile.inventory.item_reroll || 0) <= 0) return;
+        if (!this.profile.inventory || (this.profile.inventory.item_reroll || 0) <= 0) {
+            alert('Nincs több Újradobód! Szerezz be a Boltban 🛒');
+            return;
+        }
         this.profile.inventory.item_reroll--;
 
         for (let i = 0; i < 3; i++) {
             this.spawnPieceInSlot(i);
         }
-        window.soundManager.playLineClear();
+        if (window.soundManager && window.soundManager.playClear) {
+            window.soundManager.playClear(1, 1);
+        }
         this.saveProfile();
-        this.updateInGamePowerupsUI();
         this.updateDockAvailability();
-        this.showFloatingScore(`🔄 Új formák!`);
+        const remReroll = this.profile.inventory.item_reroll || 0;
+        this.showFloatingScore(`🔄 Új formák! (${remReroll} maradt)`);
     }
 
     executeExtraMoves() {
-        if (!this.profile.inventory || (this.profile.inventory.item_moves || 0) <= 0) return;
+        if (!this.profile.inventory || (this.profile.inventory.item_moves || 0) <= 0) {
+            alert('Nincs több Extra Lépésed! Szerezz be a Boltban 🛒');
+            return;
+        }
         this.profile.inventory.item_moves--;
 
-        this.movesLeft += 5;
-        window.soundManager.playLevelUp();
-        this.updateAdventureObjUI();
+        if (this.gameMode === 'adventure') {
+            this.movesLeft += 5;
+            this.updateAdventureObjUI();
+            this.showFloatingScore(`⏳ +5 Lépés! (${this.profile.inventory.item_moves} maradt)`);
+        } else {
+            this.addScore(500);
+            this.showFloatingScore(`⏳ +500 Pont Bónusz! (${this.profile.inventory.item_moves} maradt)`);
+        }
+        if (window.soundManager && window.soundManager.playLevelUp) {
+            window.soundManager.playLevelUp();
+        }
         this.saveProfile();
-        this.updateInGamePowerupsUI();
-        this.showFloatingScore(`⏳ +5 Lépés!`);
     }
 
     executeMagnet() {
-        if (!this.profile.inventory || (this.profile.inventory.item_magnet || 0) <= 0) return;
+        if (!this.profile.inventory || (this.profile.inventory.item_magnet || 0) <= 0) {
+            alert('Nincs több Mágnesed! Szerezz be a Boltban 🛒');
+            return;
+        }
 
         const colorCounts = {};
         for (let r = 0; r < this.boardSize; r++) {
@@ -1469,17 +1546,22 @@ class BlockBlasterApp {
             }
         }
 
-        window.soundManager.playLineClear();
+        if (window.soundManager && window.soundManager.playClear) {
+            window.soundManager.playClear(2, 2);
+        }
         this.addScore(clearedCount * 20);
         this.saveProfile();
-        this.updateInGamePowerupsUI();
         this.renderBoard();
         this.updateDockAvailability();
-        this.showFloatingScore(`🧲 -${clearedCount} Kocka!`);
+        const remMag = this.profile.inventory.item_magnet || 0;
+        this.showFloatingScore(`🧲 -${clearedCount} Kocka! (${remMag} maradt)`);
     }
 
     executeShield() {
-        if (!this.profile.inventory || (this.profile.inventory.item_shield || 0) <= 0) return;
+        if (!this.profile.inventory || (this.profile.inventory.item_shield || 0) <= 0) {
+            alert('Nincs több Védőpajzsod! Szerezz be a Boltban 🛒');
+            return;
+        }
         this.profile.inventory.item_shield--;
 
         let clearedCount = 0;
@@ -1493,13 +1575,15 @@ class BlockBlasterApp {
             }
         }
 
-        window.soundManager.playLevelUp();
-        this.addScore(clearedCount * 15);
+        if (window.soundManager && window.soundManager.playLevelUp) {
+            window.soundManager.playLevelUp();
+        }
+        this.addScore(clearedCount * 15 + 100);
         this.saveProfile();
-        this.updateInGamePowerupsUI();
         this.renderBoard();
         this.updateDockAvailability();
-        this.showFloatingScore(`🛡️ Közép kitisztítva!`);
+        const remShield = this.profile.inventory.item_shield || 0;
+        this.showFloatingScore(`🛡️ Közép tisztítva! (${remShield} maradt)`);
     }
 
     getRandomShape() {
@@ -1981,9 +2065,12 @@ class BlockBlasterApp {
 
                 card.innerHTML = `
                     <div class="shop-item-icon-wrap">${item.icon}</div>
-                    <div class="shop-item-qty-badge">${item.qty}</div>
+                    <div class="shop-item-qty-badge">+${item.qty}</div>
                     <div class="shop-item-title">${item.name}</div>
                     <div class="shop-item-desc">${item.desc}</div>
+                    <div class="shop-item-owned-badge ${ownedQty > 0 ? 'has-stock' : ''}">
+                        Birtokodban: <strong>${ownedQty} db</strong>
+                    </div>
                     <button class="btn-shop-buy" data-item="${item.id}" data-price="${item.price}">
                         <span>Vásárlás</span>
                         <span>${item.price} <span class="gold-icon"></span></span>
@@ -2032,11 +2119,11 @@ class BlockBlasterApp {
         }
 
         this.saveProfile();
-        this.renderShop();
         if (window.soundManager && window.soundManager.playCoin) {
             window.soundManager.playCoin();
         }
-        alert(`🎉 Sikeresen megvásároltad: ${itemDef.name} (${itemDef.qty})!`);
+        const totalOwned = itemId === 'item_chest' ? '' : `\nBirtokodban most: ${this.profile.inventory[itemId]} db`;
+        alert(`🎉 Sikeresen megvásároltad: ${itemDef.name} (+${itemDef.qty})!${totalOwned}`);
     }
 
     claimDailyReward() {
